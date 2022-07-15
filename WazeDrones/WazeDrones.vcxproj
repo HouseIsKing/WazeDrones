@@ -239,6 +239,9 @@
       <SDLCheck>true</SDLCheck>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="Util\TessellationHelper.cpp" />
+    <ClCompile Include="Util\Transform.cpp" />
+    <ClCompile Include="Util\Vertex.cpp" />
     <ClCompile Include="WazeDrones.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -248,6 +251,9 @@
     <ClInclude Include="Util\BoundingBox.h" />
     <ClInclude Include="Util\CustomRandomEngine.h" />
     <ClInclude Include="Util\EngineDefaults.h" />
+    <ClInclude Include="Util\TessellationHelper.h" />
+    <ClInclude Include="Util\Transform.h" />
+    <ClInclude Include="Util\Vertex.h" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Shaders\FragmentShader.glsl" />
