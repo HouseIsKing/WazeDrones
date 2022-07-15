@@ -3,7 +3,6 @@
 //
 
 #include "TessellationHelper.h"
-#include "../Entities/Player/PlayerController.h"
 #include <ranges>
 
 TessellationHelper::~TessellationHelper()
@@ -94,8 +93,6 @@ void TessellationHelper::Draw(const size_t transformId, const size_t startPos, s
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, TexCoords)));
 		glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, Color)));
 		glVertexAttribIPointer(3, 1, GL_INT, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, IndexTexture)));
-		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, Normal)));
-		glVertexAttribIPointer(5, 1, GL_INT, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, Brightness)));
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Ebo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLintptr>(TriangleIndices.size() * sizeof(GLushort)), TriangleIndices.data(), GL_STATIC_DRAW);
 		TrianglesCount = TriangleIndices.size();
@@ -110,16 +107,12 @@ void TessellationHelper::Draw(const size_t transformId, const size_t startPos, s
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 	glEnableVertexAttribArray(3);
-	glEnableVertexAttribArray(4);
-	glEnableVertexAttribArray(5);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Ebo);
 	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(count), GL_UNSIGNED_SHORT, reinterpret_cast<void*>(startPos * sizeof(GLushort)));
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
 	glDisableVertexAttribArray(3);
-	glDisableVertexAttribArray(4);
-	glDisableVertexAttribArray(5);
 }
 
 size_t TessellationHelper::AddTransform(const Transform transform)

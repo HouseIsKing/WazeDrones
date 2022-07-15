@@ -161,6 +161,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="Shaders\Shader.cpp" />
     <ClCompile Include="Textures\Texture.cpp" />
@@ -246,6 +247,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CameraManager.h" />
     <ClInclude Include="Shaders\Shader.h" />
     <ClInclude Include="Textures\Texture.h" />
     <ClInclude Include="Util\BoundingBox.h" />

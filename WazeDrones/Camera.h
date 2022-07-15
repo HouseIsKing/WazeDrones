@@ -52,6 +52,7 @@ public:
     Camera(vec3 position, float aspectRatio);
     void SetFov(float newFov);
     [[nodiscard]] vec3 GetFrontVector() const;
+    [[nodiscard]] vec3 GetRightVector() const;
     void SetAspectRatio(float newAspectRatio);
     void RecalculateProjectionMatrix();
     void RecalculateViewMatrix();
