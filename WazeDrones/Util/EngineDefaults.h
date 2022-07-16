@@ -1,9 +1,8 @@
 ﻿#pragma once
+#include "../Textures/Texture.h"
 #include "../Shaders/Shader.h"
 #include "CustomRandomEngine.h"
 #include <array>
-
-#include "../Textures/Texture.h"
 
 using std::array;
 using std::unique_ptr;
