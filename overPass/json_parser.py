@@ -54,9 +54,9 @@ def parse_json(data):
     for building in buildings:
         if building['geometry']['type'] != 'Polygon': continue
 
-        print(len(building['geometry']['coordinates'][0]))
-
         cords_list = building['geometry']['coordinates'][0]
+        print(len(cords_list))
+
         for cord in cords_list:
             print(*get_xy(cord[1],cord[0]))
 
