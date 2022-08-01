@@ -38,11 +38,12 @@ if __name__ == '__main__':
     # stdout to new file
     sys.stdout = open('../tel_aviv.txt', 'w')
     data = get_json()
+    print(len(data['features']))
     for building in data['features']:
         if building['geometry']['type'] != 'Polygon':
             continue
+        print(len(building['geometry']['coordinates'][0]))
         for cord in building['geometry']['coordinates'][0]:
-            print("lat:",cord[1],"lon:",cord[0])
             get_xy(cord[1],cord[0])
         # if no key: height - use default value
         if 'height' in building['properties']:
