@@ -21,7 +21,7 @@ def get_xy(lat,lon):
     """
     @param lat: latitude
     @param lon: longitude
-    @print: x,y coordinates
+    @return: x,y coordinates
     """
     point = (lat, lon)
     distance = haversine(ORIGIN_POINT, point, unit='m')
@@ -42,8 +42,7 @@ def get_xy(lat,lon):
     brng = 360 - brng                   # count degrees counter-clockwise from North 
     y = sin(radians(brng)) * distance
     x = cos(radians(brng)) * distance
-    print(x)
-    print(y)
+    return x,y
 
 def parse_json(data):
     """
@@ -59,7 +58,7 @@ def parse_json(data):
 
         cords_list = building['geometry']['coordinates'][0]
         for cord in cords_list:
-            get_xy(cord[1],cord[0])
+            print(*get_xy(cord[1],cord[0]))
 
         # if no key: height - use default value
         if 'height' in building['properties']:
