@@ -21,7 +21,7 @@ def get_xy(lat,lon):
     """
     @param lat: latitude
     @param lon: longitude
-    @return: x,y coordinates
+    @print: x,y coordinates
     """
     point = (lat, lon)
     distance = haversine(ORIGIN_POINT, point, unit='m')
