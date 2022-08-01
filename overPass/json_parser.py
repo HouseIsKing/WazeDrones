@@ -47,6 +47,8 @@ if __name__ == '__main__':
         # if no key: height - use default value
         if 'height' in building['properties']:
             BUILDING_HEIGHT = building['properties']['height']
+        elif 'building:levels' in building['properties']:
+            BUILDING_HEIGHT = float(building['properties']['building:levels']) * 3
         print("height:",BUILDING_HEIGHT)
         print('-----------------------------------------------------\n')
     sys.stdout.close()
