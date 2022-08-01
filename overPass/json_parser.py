@@ -31,8 +31,8 @@ def get_xy(lat,lon):
     brng = 360 - brng                   # count degrees counter-clockwise from North 
     y = sin(radians(brng)) * distance
     x = cos(radians(brng)) * distance
-    print('x = ' + str(x))
-    print('y = ' + str(y))
+    print(x)
+    print(y)
 
 if __name__ == '__main__':
     # stdout to new file
@@ -49,6 +49,5 @@ if __name__ == '__main__':
             BUILDING_HEIGHT = building['properties']['height']
         elif 'building:levels' in building['properties']:
             BUILDING_HEIGHT = float(building['properties']['building:levels']) * 3
-        print("height:",BUILDING_HEIGHT)
-        print('-----------------------------------------------------\n')
+        print(BUILDING_HEIGHT)
     sys.stdout.close()
