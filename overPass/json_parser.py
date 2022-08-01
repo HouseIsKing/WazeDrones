@@ -7,11 +7,22 @@ ORIGIN_POINT = (32.0853, 34.7818) #Origin point - (lat, lon)
 BUILDING_HEIGHT = 10
 
 def get_json(file='../tel_aviv.geojson'):
+    """
+    Get json file from the given path.
+    @param file: path to the json file
+    @return: json file
+    """
+    
     with open(file,encoding="utf8") as f:
         data = json.load(f)
     return data
 
 def get_xy(lat,lon):
+    """
+    @param lat: latitude
+    @param lon: longitude
+    @return: x,y coordinates
+    """
     point = (lat, lon)
     distance = haversine(ORIGIN_POINT, point, unit='m')
 
@@ -34,21 +45,32 @@ def get_xy(lat,lon):
     print(x)
     print(y)
 
-if __name__ == '__main__':
-    # stdout to new file
-    sys.stdout = open('../tel_aviv.txt', 'w')
-    data = get_json()
-    print(len(data['features']))
-    for building in data['features']:
-        if building['geometry']['type'] != 'Polygon':
-            continue
+def parse_json(data):
+    """
+    @param data: json file
+    @print: list of buildings with their coordinates and height
+    """
+    buildings = data['features']
+    print(len(buildings))
+    for building in buildings:
+        if building['geometry']['type'] != 'Polygon': continue
+
         print(len(building['geometry']['coordinates'][0]))
-        for cord in building['geometry']['coordinates'][0]:
+
+        cords_list = building['geometry']['coordinates'][0]
+        for cord in cords_list:
             get_xy(cord[1],cord[0])
+
         # if no key: height - use default value
         if 'height' in building['properties']:
             BUILDING_HEIGHT = building['properties']['height']
         elif 'building:levels' in building['properties']:
-            BUILDING_HEIGHT = float(building['properties']['building:levels']) * 3
-        print(BUILDING_HEIGHT)
+            BUILDING_HEIGHT = float(building['properties']['building:levels']) * 3  # 3 meters per level
+
+        print(BUILDING_HEIGHT) 
+
+if __name__ == '__main__':
+    sys.stdout = open('../tel_aviv.txt', 'w')
+    data = get_json()
+    parse_json(data)
     sys.stdout.close()
