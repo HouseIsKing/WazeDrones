@@ -3,13 +3,15 @@ from math import sin,cos,radians,atan2,degrees
 import json
 import sys
 
+ORIGIN_POINT = (32.0853, 34.7818) #Origin point - (lat, lon)
+BUILDING_HEIGHT = 10
+
 def get_json(file='../tel_aviv.geojson'):
     with open(file,encoding="utf8") as f:
         data = json.load(f)
     return data
 
 def get_xy(lat,lon):
-    ORIGIN_POINT = (32.0853, 34.7818) #Origin point - (lat, lon)
     point = (lat, lon)
     distance = haversine(ORIGIN_POINT, point, unit='m')
 
@@ -42,10 +44,9 @@ if __name__ == '__main__':
         for cord in building['geometry']['coordinates'][0]:
             print("lat:",cord[1],"lon:",cord[0])
             get_xy(cord[1],cord[0])
-        # if no key: height - set default value 
-        building_height = 10
+        # if no key: height - use default value
         if 'height' in building['properties']:
-            building_height = building['properties']['height']
-        print("height:",building_height)
+            BUILDING_HEIGHT = building['properties']['height']
+        print("height:",BUILDING_HEIGHT)
         print('-----------------------------------------------------\n')
     sys.stdout.close()
