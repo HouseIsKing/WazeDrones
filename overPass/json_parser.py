@@ -4,7 +4,7 @@ import json
 import sys
 
 ORIGIN_POINT = (32.0853, 34.7818) #Origin point - (lat, lon)
-BUILDING_HEIGHT = 10
+BUILDING_HEIGHT = 1
 
 def get_json(file='../tel_aviv.geojson'):
     """
@@ -69,7 +69,7 @@ def parse_json(data):
         print(BUILDING_HEIGHT) 
 
 if __name__ == '__main__':
-    sys.stdout = open('../tel_aviv.txt', 'w')
+    sys.stdout = open('../WazeDrones/Data/tel_aviv.txt', 'w')
     data = get_json()
     parse_json(data)
     sys.stdout.close()
