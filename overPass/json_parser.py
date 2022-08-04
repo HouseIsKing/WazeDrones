@@ -3,8 +3,7 @@ from math import sin,cos,radians,atan2,degrees
 import json
 import sys
 
-ORIGIN_POINT = (32.0853, 34.7818) #Origin point - (lat, lon)
-BUILDING_HEIGHT = 1
+
 
 def get_json(file='../tel_aviv.geojson'):
     """
@@ -23,6 +22,7 @@ def get_xy(lat,lon):
     @param lon: longitude
     @return: x,y coordinates
     """
+    ORIGIN_POINT = (32.0853, 34.7818) #Origin point - (lat, lon)
     point = (lat, lon)
     distance = haversine(ORIGIN_POINT, point, unit='m')
 
@@ -49,6 +49,8 @@ def parse_json(data):
     @param data: json file
     @print: list of buildings with their coordinates and height
     """
+    
+    BUILDING_HEIGHT = 1
     buildings = data['features']
     print(len(buildings))
     for building in buildings:
@@ -69,6 +71,7 @@ def parse_json(data):
         print(BUILDING_HEIGHT) 
 
 if __name__ == '__main__':
+    
     sys.stdout = open('../WazeDrones/Data/tel_aviv.txt', 'w')
     data = get_json()
     parse_json(data)
