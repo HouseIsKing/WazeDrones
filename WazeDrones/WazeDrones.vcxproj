@@ -258,6 +258,9 @@
     <ClInclude Include="Util\Vertex.h" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Data\tel_aviv.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Shaders\FragmentShader.glsl" />
     <Content Include="Shaders\VertexShader.glsl" />
   </ItemGroup>

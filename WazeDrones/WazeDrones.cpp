@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include "Util/EngineDefaults.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -37,10 +39,6 @@ GLFWwindow* Init()
     return window;
 }
 
-void BuildSimulationGeometry()
-{
-}
-
 void BuildBuilding(std::vector<vec3>& polygon, float height, TessellationHelper& tessellationHelper)
 {
     std::vector<vec3> topPolygon;
@@ -49,10 +47,10 @@ void BuildBuilding(std::vector<vec3>& polygon, float height, TessellationHelper&
     {
         topPolygon.emplace_back(i.x, height, i.z);
     }
-    const uint16_t mainIndex = tessellationHelper.AddVertex(Vertex(polygon[0], 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0));
-    const uint16_t mainIndexTop = tessellationHelper.AddVertex(Vertex(topPolygon[0], 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0));
-    uint16_t previousIndex = tessellationHelper.AddVertex(Vertex(polygon[1], 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0));
-    uint16_t previousIndexTop = tessellationHelper.AddVertex(Vertex(topPolygon[1], 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0));
+    const uint32_t mainIndex = tessellationHelper.AddVertex(Vertex(polygon[0], 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0));
+    const uint32_t mainIndexTop = tessellationHelper.AddVertex(Vertex(topPolygon[0], 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0));
+    uint32_t previousIndex = tessellationHelper.AddVertex(Vertex(polygon[1], 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0));
+    uint32_t previousIndexTop = tessellationHelper.AddVertex(Vertex(topPolygon[1], 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0));
     tessellationHelper.AddTriangle(mainIndex);
     tessellationHelper.AddTriangle(previousIndex);
     tessellationHelper.AddTriangle(mainIndexTop);
@@ -61,8 +59,8 @@ void BuildBuilding(std::vector<vec3>& polygon, float height, TessellationHelper&
     tessellationHelper.AddTriangle(previousIndex);
     for (size_t i = 2; i < polygon.size(); i++)
     {
-        const uint16_t index = tessellationHelper.AddVertex(Vertex(polygon[i], 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0));
-        const uint16_t indexTop = tessellationHelper.AddVertex(Vertex(topPolygon[i], 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0));
+        const uint32_t index = tessellationHelper.AddVertex(Vertex(polygon[i], 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0));
+        const uint32_t indexTop = tessellationHelper.AddVertex(Vertex(topPolygon[i], 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0));
         //bottom triangle
         tessellationHelper.AddTriangle(mainIndex);
         tessellationHelper.AddTriangle(index);
@@ -89,6 +87,32 @@ void BuildBuilding(std::vector<vec3>& polygon, float height, TessellationHelper&
     tessellationHelper.AddTriangle(previousIndex);
 }
 
+void BuildSimulationGeometry(TessellationHelper& tessellationHelper)
+{
+    std::ifstream file("Data/tel_aviv.txt");
+    int buildingCount;
+    file >> buildingCount;
+    for (int i = 0; i < buildingCount; i++)
+    {
+        size_t numPoints;
+        file >> numPoints;
+        std::vector<vec3> points;
+        points.reserve(numPoints);
+        for (size_t j = 0; j < numPoints - 1; j++)
+        {
+            float x;
+            float y;
+            file >> x >> y;
+            points.emplace_back(x, 0, y);
+        }
+        float temp;
+        file >> temp >> temp;
+        float height;
+        file >> height;
+        BuildBuilding(points, height * 2.5F, tessellationHelper);
+    }
+}
+
 int main(int /*argc*/, char* /*argv*/[])
 {
     GLFWwindow* window = Init();
@@ -103,16 +127,8 @@ int main(int /*argc*/, char* /*argv*/[])
     double tickTimer = 0.0;
     double timePrev = glfwGetTime();
     CameraManager cameraManager{window};
-    vector<vec3> data;
-    data.reserve(6);
-    data.emplace_back(-3.0F, 0.0F, 3.0F);
-    data.emplace_back(3.0F, 0.0F, 3.0F);
-    data.emplace_back(6.0F, 0.0F, 0.0F);
-    data.emplace_back(3.0F, 0.0F, -3.0F);
-    data.emplace_back(-3.0F, 0.0F, -3.0F);
-    data.emplace_back(-6.0F, 0.0F, 0.0F);
     TessellationHelper worldTessellation{EngineDefaults::GetShader()};
-    BuildBuilding(data, 10.0F, worldTessellation);
+    BuildSimulationGeometry(worldTessellation);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glEnable(GL_CULL_FACE);
     while (glfwWindowShouldClose(window) == 0)
@@ -137,7 +153,6 @@ int main(int /*argc*/, char* /*argv*/[])
             counter = 0;
         }
         glfwPollEvents();
-        
     }
     glfwTerminate();
     return 0;

@@ -17,7 +17,7 @@ class TessellationHelper
     GLuint Vao;
     GLuint Ebo;
     vector<Vertex> Vertices{};
-    vector<GLushort> TriangleIndices{};
+    vector<GLuint> TriangleIndices{};
     vector<Transform> TessellationTransforms{};
     Shader* TheShader;
     bool HasInit;
@@ -35,8 +35,8 @@ public:
     explicit TessellationHelper(Shader* shader);
     TessellationHelper(Shader* shader, float x, float y, float z);
     [[nodiscard]] Transform& GetTransform(size_t id);
-    uint16_t AddVertex(const Vertex& vertex);
-    void AddTriangle(uint16_t triangle);
+    uint32_t AddVertex(const Vertex& vertex);
+    void AddTriangle(uint32_t triangle);
     void Draw();
     void FreeMemory();
     void Draw(size_t transformId, size_t startPos, size_t count);

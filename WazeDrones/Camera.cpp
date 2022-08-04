@@ -118,7 +118,7 @@ Camera::Camera(const vec3 position, const float aspectRatio) : Front(0, 0, -1), 
                                                                Fov(70), AspectRatio(aspectRatio), ViewMatrix(),
                                                                ProjectionMatrix(),
                                                                IsDirtyProjectionMatrix(true),
-                                                               PrevYaw(0), ZNear(0.05F), ZFar(1000.0F), PrevPitch(0),
+                                                               PrevYaw(0), ZNear(0.05F), ZFar(100000.0F), PrevPitch(0),
                                                                Position(position), Pitch(0), Yaw(0)
 {
     UpdateVectors();
