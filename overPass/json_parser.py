@@ -89,7 +89,7 @@ def parse_parks_json(data):
 
     parks = data['features']
     print(len(parks))
-    print(PARK_HEIGHT)
+
     for park in parks:
         if park['geometry']['type'] == 'Point': continue
 
@@ -98,7 +98,8 @@ def parse_parks_json(data):
 
         for cord in cords_list:
             print(*get_xy(cord[1],cord[0]))
-
+    
+        print(PARK_HEIGHT)
     sys.stdout.close()
 
 
