@@ -103,9 +103,34 @@ def parse_parks_json(data):
     sys.stdout.close()
 
 
+def parse_roads_json(data):
+    """
+    @param data: json file
+    @print: list of roads with their coordinates
+    """
+
+    sys.stdout = open('../WazeDrones/Data/roads_tel_aviv.txt', 'w')
+
+    roads = data['features']
+    print(len(roads))
+
+    for road in roads:
+
+        cords_list = road['geometry']['coordinates']
+        print(len(cords_list))
+
+        for cord in cords_list:
+            print(*get_xy(cord[1],cord[0]))
+        
+        print('0')
+    sys.stdout.close()
+
+
 if __name__ == '__main__':
     
     data = get_json('../buildings_tel_aviv.geojson')
     parse_buildings_json(data)
     data = get_json('../parks_tel_aviv.geojson')
     parse_parks_json(data)
+    data = get_json('../roads_tel_aviv.geojson')
+    parse_roads_json(data)
