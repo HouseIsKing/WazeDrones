@@ -117,6 +117,7 @@ def parse_roads_json(data):
     for road in roads:
 
         cords_list = road['geometry']['coordinates']
+        if len(cords_list) <= 2: continue
         print(len(cords_list))
 
         for cord in cords_list:
