@@ -56,6 +56,12 @@ def parse_buildings_json(data):
     """
 
     sys.stdout = open('../WazeDrones/Data/buildings_tel_aviv.txt', 'w')
+    left_point = (32.0476023,34.7885795)
+    right_point = (32.0823978,34.8238885)
+    left_point_xy = get_xy(*left_point)
+    right_point_xy = get_xy(*right_point)
+    print(*left_point_xy)
+    print(*right_point_xy)
 
     buildings = data['features']
     print(len(buildings))
