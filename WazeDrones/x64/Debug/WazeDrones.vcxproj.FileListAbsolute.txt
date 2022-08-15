@@ -1,1 +1,7 @@
-C:\Users\amitz\RiderProjects\WazeDrones\x64\Debug\Data\tel_aviv.txt
+C:\Users\amitz\RiderProjects\WazeDrones\x64\Debug\Data\buildings_tel_aviv.txt
+C:\Users\amitz\RiderProjects\WazeDrones\x64\Debug\Data\parks_tel_aviv.txt
+C:\Users\amitz\RiderProjects\WazeDrones\x64\Debug\Textures\grass.jpg
+C:\Users\amitz\RiderProjects\WazeDrones\x64\Debug\Shaders\FragmentShader.glsl
+C:\Users\amitz\RiderProjects\WazeDrones\x64\Debug\Shaders\VertexShader.glsl
+C:\Users\amitz\RiderProjects\WazeDrones\x64\Debug\Textures\building.jpg
+C:\Users\amitz\RiderProjects\WazeDrones\x64\Debug\Data\roads_tel_aviv.txt

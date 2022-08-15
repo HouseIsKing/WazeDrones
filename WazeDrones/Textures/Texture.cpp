@@ -27,8 +27,8 @@ Texture* Texture::LoadTexture(const string& path)
     const GLsizei numMipmaps = static_cast<GLsizei>(log2(std::max(width, height))) + 1;
     glTextureStorage2D(textureId, numMipmaps, GL_RGBA8, width, height);
     glTextureSubImage2D(textureId, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-    glTextureParameteri(textureId, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTextureParameteri(textureId, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(textureId, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTextureParameteri(textureId, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTextureParameteri(textureId, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
     glTextureParameteri(textureId, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glGenerateTextureMipmap(textureId);
