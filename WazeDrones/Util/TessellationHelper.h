@@ -16,6 +16,7 @@ class TessellationHelper
     GLuint Vbo;
     GLuint Vao;
     GLuint Ebo;
+    GLenum DrawMode;
     vector<Vertex> Vertices{};
     vector<GLuint> TriangleIndices{};
     vector<Transform> TessellationTransforms{};
@@ -33,6 +34,7 @@ public:
     TessellationHelper& operator=(TessellationHelper&&) = delete;
     [[nodiscard]] bool HasInitialized() const;
     explicit TessellationHelper(Shader* shader);
+    TessellationHelper(Shader* shader, GLenum drawMode);
     TessellationHelper(Shader* shader, float x, float y, float z);
     [[nodiscard]] Transform& GetTransform(size_t id);
     uint32_t AddVertex(const Vertex& vertex);

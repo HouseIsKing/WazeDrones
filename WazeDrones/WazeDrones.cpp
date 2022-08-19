@@ -2,9 +2,9 @@
 
 #include "Util/EngineDefaults.h"
 #include <GLFW/glfw3.h>
+#include <glm/vec3.hpp>
 #include <iostream>
 #include <vector>
-#include <glm/vec3.hpp>
 
 #include "CameraManager.h"
 #include "Util/TessellationHelper.h"
@@ -22,7 +22,7 @@ GLFWwindow* Init()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_SAMPLES, 4);
+    glfwWindowHint(GLFW_SAMPLES, 8);
     GLFWwindow* window = glfwCreateWindow(1280, 720, "WazeDrones", nullptr, nullptr);
     if (window == nullptr)
     {
@@ -99,13 +99,13 @@ void BuildPolygon(std::vector<vec3>& polygon, float height, TessellationHelper& 
 
 void BuildPolygons(std::ifstream& file, TessellationHelper& tessellationHelper, const uint16_t texture, bool buildCollider)
 {
-    int polygonCount;
+    size_t polygonCount;
     file >> polygonCount;
     if (buildCollider)
     {
         colliders.reserve(colliders.size() + polygonCount);
     }
-    for (int i = 0; i < polygonCount; i++)
+    for (size_t i = 0; i < polygonCount; i++)
     {
         size_t numPoints;
         file >> numPoints;
@@ -151,7 +151,58 @@ void BuildPolygons(std::ifstream& file, TessellationHelper& tessellationHelper, 
     file.close();
 }
 
-void BuildSimulationGeometry(TessellationHelper& tessellationHelper)
+void BuildLine(const vector<vec3>& points, TessellationHelper& tessellationHelper)
+{
+    if (points.size() < 2)
+    {
+        return;
+    }
+    uint32_t previousIndex = 0;
+    bool start = true;
+    for (const vec3& point : points)
+    {
+        const uint32_t currentIndex = tessellationHelper.AddVertex(Vertex(point, 0.0F, 0.0F, 0.1F, 0.1F, 0.1F, 1.0F, 0));
+        if (!start)
+        {
+            tessellationHelper.AddTriangle(previousIndex);
+            tessellationHelper.AddTriangle(currentIndex);
+        }
+        else
+        {
+            start = false;
+        }
+        previousIndex = currentIndex;
+    }
+}
+
+void BuildLines(std::ifstream& file, TessellationHelper& tessellationHelper)
+{
+    size_t lineCount;
+    file >> lineCount;
+    //lineCount = 50;
+    for (size_t i = 0; i < lineCount; i++)
+    {
+        size_t numPoints;
+        file >> numPoints;
+        std::vector<vec3> points;
+        points.reserve(numPoints);
+        for (size_t j = 0; j < numPoints - 1; j++)
+        {
+            float x;
+            float y;
+            file >> x >> y;
+            points.emplace_back(x, 0, y);
+        }
+        float temp;
+        file >> temp >> temp;
+        float height;
+        file >> height;
+        BuildLine(points, tessellationHelper);
+    }
+    file.close();
+}
+
+void BuildSimulationGeometry(TessellationHelper& tessellationHelperTriangles, TessellationHelper& tessellationHelperLines)
 {
     std::ifstream file("Data/buildings_tel_aviv.txt");
     const uint16_t grassTexture = EngineDefaults::RegisterTexture(Texture::LoadTexture("Textures/grass.jpg"));
@@ -161,13 +212,12 @@ void BuildSimulationGeometry(TessellationHelper& tessellationHelper)
     float topX;
     float topZ;
     file >> bottomX >> bottomZ >> topX >> topZ;
-    //const uint16_t roadTexture = EngineDefaults::RegisterTexture(Texture::LoadTexture("Textures/road.jpg"));
     EngineDefaults::BuildTextureUbo();
-    BuildPolygons(file, tessellationHelper, buildingTexture, true);
+    BuildPolygons(file, tessellationHelperTriangles, buildingTexture, true);
     file.open("Data/parks_tel_aviv.txt");
-    BuildPolygons(file, tessellationHelper, grassTexture, false);
-    //file.open("Data/roads_tel_aviv.txt");
-    //BuildPolygons(file, tessellationHelper, roadTexture);
+    BuildPolygons(file, tessellationHelperTriangles, grassTexture, false);
+    file.open("Data/roads_tel_aviv.txt");
+    BuildLines(file, tessellationHelperLines);
 }
 
 int main(int /*argc*/, char* /*argv*/[])
@@ -185,7 +235,8 @@ int main(int /*argc*/, char* /*argv*/[])
     double timePrev = glfwGetTime();
     CameraManager cameraManager{window};
     TessellationHelper worldTessellation{EngineDefaults::GetShader()};
-    BuildSimulationGeometry(worldTessellation);
+    TessellationHelper linesTessellation{EngineDefaults::GetShader(), GL_LINES};
+    BuildSimulationGeometry(worldTessellation, linesTessellation);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
@@ -198,6 +249,8 @@ int main(int /*argc*/, char* /*argv*/[])
             cameraManager.Tick();
         }
         worldTessellation.Draw();
+        glLineWidth(8);
+        linesTessellation.Draw();
         glfwSwapBuffers(window);
         double timeNow = glfwGetTime();
         counter++;

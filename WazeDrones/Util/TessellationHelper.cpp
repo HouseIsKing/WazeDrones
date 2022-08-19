@@ -17,14 +17,19 @@ bool TessellationHelper::HasInitialized() const
 	return HasInit;
 }
 
-TessellationHelper::TessellationHelper(Shader* shader) : Vbo(0), Vao(0), Ebo(0), TheShader(shader), HasInit(false), TrianglesCount(0)
+TessellationHelper::TessellationHelper(Shader* shader) : TessellationHelper(shader, GL_TRIANGLES)
 {
-    glGenVertexArrays(1, &Vao);
-    glGenBuffers(1, &Vbo);
-    glGenBuffers(1, &Ebo);
-    TheShader->Use();
-    PositionUniform = TheShader->GetUniformInt("transformationMatrix");
-    TessellationTransforms.emplace_back();
+}
+
+TessellationHelper::TessellationHelper(Shader* shader, const GLenum drawMode) : Vbo(0), Vao(0), Ebo(0),
+	DrawMode(drawMode), TheShader(shader), HasInit(false), TrianglesCount(0)
+{
+	glGenVertexArrays(1, &Vao);
+	glGenBuffers(1, &Vbo);
+	glGenBuffers(1, &Ebo);
+	TheShader->Use();
+	PositionUniform = TheShader->GetUniformInt("transformationMatrix");
+	TessellationTransforms.emplace_back();
 }
 
 Transform& TessellationHelper::GetTransform(const size_t id)
@@ -108,7 +113,7 @@ void TessellationHelper::Draw(const size_t transformId, const size_t startPos, s
 	glEnableVertexAttribArray(2);
 	glEnableVertexAttribArray(3);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Ebo);
-	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(count), GL_UNSIGNED_INT, reinterpret_cast<void*>(startPos * sizeof(GLuint)));
+	glDrawElements(DrawMode, static_cast<GLsizei>(count), GL_UNSIGNED_INT, reinterpret_cast<void*>(startPos * sizeof(GLuint)));
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
