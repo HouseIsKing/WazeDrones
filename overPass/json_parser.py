@@ -72,7 +72,8 @@ def parse_buildings_json(data):
         print(len(cords_list))
 
         for cord in cords_list:
-            print(*get_xy(cord[1],cord[0]))
+            xy = get_xy(cord[1],cord[0])
+            print(round(xy[0],7),round(xy[1],7))
 
         # if no key: height - use default value
         if 'height' in building['properties']:
@@ -103,7 +104,8 @@ def parse_parks_json(data):
         print(len(cords_list))
 
         for cord in cords_list:
-            print(*get_xy(cord[1],cord[0]))
+            xy = get_xy(cord[1],cord[0])
+            print(round(xy[0],7),round(xy[1],7))
     
         print(PARK_HEIGHT)
     sys.stdout.close()
@@ -127,8 +129,9 @@ def parse_roads_json(data):
         print(len(cords_list))
 
         for cord in cords_list:
-            print(*get_xy(cord[1],cord[0]))
-        
+            xy = get_xy(cord[1],cord[0])
+            print(round(xy[0],7),round(xy[1],7))
+
         print('0')
     sys.stdout.close()
 
