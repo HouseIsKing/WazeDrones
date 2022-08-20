@@ -246,6 +246,7 @@
       <SDLCheck>true</SDLCheck>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="Util\OctreeNode.cpp" />
     <ClCompile Include="Util\TessellationHelper.cpp" />
     <ClCompile Include="Util\Transform.cpp" />
     <ClCompile Include="Util\Vertex.cpp" />
@@ -259,6 +260,7 @@
     <ClInclude Include="Util\BoundingBox.h" />
     <ClInclude Include="Util\CustomRandomEngine.h" />
     <ClInclude Include="Util\EngineDefaults.h" />
+    <ClInclude Include="Util\OctreeNode.h" />
     <ClInclude Include="Util\TessellationHelper.h" />
     <ClInclude Include="Util\Transform.h" />
     <ClInclude Include="Util\Vertex.h" />

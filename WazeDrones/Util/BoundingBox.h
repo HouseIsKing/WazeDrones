@@ -10,6 +10,7 @@ private:
     float MaxX, MaxY, MaxZ;
 public:
     BoundingBox(float minX, float minY, float minZ, float maxX, float maxY, float maxZ);
+    BoundingBox() = default;
     BoundingBox(const BoundingBox& other) = default;
     BoundingBox& operator=(const BoundingBox& other) = default;
     BoundingBox(BoundingBox&& other) = default;
