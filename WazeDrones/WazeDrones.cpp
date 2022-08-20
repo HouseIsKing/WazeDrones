@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "CameraManager.h"
+#include "Util/OctreeNode.h"
 #include "Util/TessellationHelper.h"
 
 std::vector<BoundingBox> colliders;
@@ -146,7 +147,7 @@ void BuildPolygons(std::ifstream& file, TessellationHelper& tessellationHelper, 
         {
             colliders.emplace_back(minX, 0.0F, minZ, maxX, height, maxZ);
         }
-        BuildPolygon(points, height * 2.5F, tessellationHelper, texture);
+        BuildPolygon(points, height, tessellationHelper, texture);
     }
     file.close();
 }
@@ -202,7 +203,7 @@ void BuildLines(std::ifstream& file, TessellationHelper& tessellationHelper)
     file.close();
 }
 
-void BuildSimulationGeometry(TessellationHelper& tessellationHelperTriangles, TessellationHelper& tessellationHelperLines)
+void BuildSimulationGeometry(TessellationHelper& tessellationHelperTriangles, TessellationHelper& tessellationHelperLines, OctreeNode& root)
 {
     std::ifstream file("Data/buildings_tel_aviv.txt");
     const uint16_t grassTexture = EngineDefaults::RegisterTexture(Texture::LoadTexture("Textures/grass.jpg"));
@@ -211,7 +212,9 @@ void BuildSimulationGeometry(TessellationHelper& tessellationHelperTriangles, Te
     float bottomZ;
     float topX;
     float topZ;
-    file >> bottomX >> bottomZ >> topX >> topZ;
+    file >> bottomX >> topZ >> topX >> bottomZ;
+    const float maxSize = std::max(abs(bottomX - topX), abs(bottomZ - topZ));
+    root.Init(BoundingBox{-5000, -5000, -5000, 5000, 5000, 5000});
     EngineDefaults::BuildTextureUbo();
     BuildPolygons(file, tessellationHelperTriangles, buildingTexture, true);
     file.open("Data/parks_tel_aviv.txt");
@@ -236,7 +239,13 @@ int main(int /*argc*/, char* /*argv*/[])
     CameraManager cameraManager{window};
     TessellationHelper worldTessellation{EngineDefaults::GetShader()};
     TessellationHelper linesTessellation{EngineDefaults::GetShader(), GL_LINES};
-    BuildSimulationGeometry(worldTessellation, linesTessellation);
+    OctreeNode root;
+    BuildSimulationGeometry(worldTessellation, linesTessellation, root);
+    /*for (BoundingBox& collider 22w: colliders)
+    {
+        root.Insert(collider);
+    }*/
+    //root.Draw(linesTessellation);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
