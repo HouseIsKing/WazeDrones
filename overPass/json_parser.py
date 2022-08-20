@@ -56,12 +56,9 @@ def parse_buildings_json(data):
     """
 
     sys.stdout = open('../WazeDrones/Data/buildings_tel_aviv.txt', 'w')
-    left_point = (32.04917307654837,34.745036856033124)
-    right_point = (32.12651802309023,34.84500521777212)
-    left_point_xy = get_xy(*left_point)
-    right_point_xy = get_xy(*right_point)
-    print(*left_point_xy)
-    print(*right_point_xy)
+    min_x,min_y,max_x,max_y = find_min_max_xy_buildings(data)
+    print(min_x,min_y)
+    print(max_x,max_y)
 
     buildings = data['features']
     print(len(buildings))
@@ -134,6 +131,31 @@ def parse_roads_json(data):
 
         print('0')
     sys.stdout.close()
+
+
+def find_min_max_xy_buildings(data):
+    """
+    @param data: json file
+    @return: min x,y coordinates of the buildings and max x,y coordinates of the buildings
+    """
+
+    min_x = 0
+    min_y = 0
+    max_x = 0
+    max_y = 0
+    buildings = data['features']
+    for building in buildings:
+        if building['geometry']['type'] != 'Polygon': continue
+
+        cords_list = building['geometry']['coordinates'][0]
+        for cord in cords_list:
+            xy = get_xy(cord[1],cord[0])
+            if xy[0] < min_x: min_x = xy[0]
+            if xy[1] < min_y: min_y = xy[1]
+            if xy[0] > max_x: max_x = xy[0]
+            if xy[1] > max_y: max_y = xy[1]
+
+    return min_x,min_y,max_x,max_y
 
 
 if __name__ == '__main__':
