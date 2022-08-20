@@ -214,7 +214,7 @@ void BuildSimulationGeometry(TessellationHelper& tessellationHelperTriangles, Te
     float topZ;
     file >> bottomX >> topZ >> topX >> bottomZ;
     const float maxSize = std::max(abs(bottomX - topX), abs(bottomZ - topZ));
-    root.Init(BoundingBox{-5000, -5000, -5000, 5000, 5000, 5000});
+    root.Init(BoundingBox{-4591.323, 0, -6544.746, -4591.323 + 12238.192, 12238.192, -6544.746 + 12238.192});
     EngineDefaults::BuildTextureUbo();
     BuildPolygons(file, tessellationHelperTriangles, buildingTexture, true);
     file.open("Data/parks_tel_aviv.txt");
@@ -241,10 +241,10 @@ int main(int /*argc*/, char* /*argv*/[])
     TessellationHelper linesTessellation{EngineDefaults::GetShader(), GL_LINES};
     OctreeNode root;
     BuildSimulationGeometry(worldTessellation, linesTessellation, root);
-    /*for (BoundingBox& collider 22w: colliders)
+    for (BoundingBox& collider : colliders)
     {
         root.Insert(collider);
-    }*/
+    }
     //root.Draw(linesTessellation);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glEnable(GL_CULL_FACE);
@@ -258,7 +258,7 @@ int main(int /*argc*/, char* /*argv*/[])
             cameraManager.Tick();
         }
         worldTessellation.Draw();
-        glLineWidth(8);
+        glLineWidth(6);
         linesTessellation.Draw();
         glfwSwapBuffers(window);
         double timeNow = glfwGetTime();
