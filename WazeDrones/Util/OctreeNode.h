@@ -10,8 +10,8 @@ class OctreeNode
 {
     BoundingBox Boundary;
     std::vector<std::unique_ptr<OctreeNode>> Children;
-    std::array<BoundingBox, 8> ChildrenBounds;
-    const float MinSize = 5.0F;
+    inline static float MinSize = 20.0F;
+    static BoundingBox GetChildrenBound(const BoundingBox& boundary, size_t boundingBoxIndex);
 public:
     explicit OctreeNode(BoundingBox boundary);
     OctreeNode();
@@ -20,8 +20,8 @@ public:
     OctreeNode& operator=(const OctreeNode& other) = delete;
     OctreeNode& operator=(OctreeNode&& other) noexcept = delete;
     ~OctreeNode() = default;
-    void Insert(BoundingBox box);
+    void Insert(const BoundingBox& box);
     [[nodiscard]] BoundingBox GetBoundary() const;
     void Draw(TessellationHelper& lineTessellation) const;
-    void Init(BoundingBox boundary);
+    void Init(const BoundingBox& boundary);
 };
