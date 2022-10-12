@@ -7,10 +7,9 @@
 #include <vector>
 
 #include "CameraManager.h"
+#include "Util/Graph.h"
 #include "Util/OctreeNode.h"
 #include "Util/TessellationHelper.h"
-
-std::vector<BoundingBox> colliders;
 
 void FramebufferSizeCallback(GLFWwindow* /*window*/, const int width, const int height)
 {
@@ -98,7 +97,7 @@ void BuildPolygon(std::vector<vec3>& polygon, float height, TessellationHelper& 
     tessellationHelper.AddTriangle(previousIndex);
 }
 
-void BuildPolygons(std::ifstream& file, TessellationHelper& tessellationHelper, const uint16_t texture, bool buildCollider)
+void BuildPolygons(std::ifstream& file, TessellationHelper& tessellationHelper, const uint16_t texture, bool buildCollider, std::vector<BoundingBox>& colliders)
 {
     size_t polygonCount;
     file >> polygonCount;
@@ -180,7 +179,6 @@ void BuildLines(std::ifstream& file, TessellationHelper& tessellationHelper)
 {
     size_t lineCount;
     file >> lineCount;
-    //lineCount = 50;
     for (size_t i = 0; i < lineCount; i++)
     {
         size_t numPoints;
@@ -203,7 +201,7 @@ void BuildLines(std::ifstream& file, TessellationHelper& tessellationHelper)
     file.close();
 }
 
-void BuildSimulationGeometry(TessellationHelper& tessellationHelperTriangles, TessellationHelper& tessellationHelperLines, OctreeNode& root)
+void BuildSimulationGeometry(TessellationHelper& tessellationHelperTriangles, TessellationHelper& tessellationHelperLines, OctreeNode& root, std::vector<BoundingBox>& colliders)
 {
     std::ifstream file("Data/buildings_tel_aviv.txt");
     const uint16_t grassTexture = EngineDefaults::RegisterTexture(Texture::LoadTexture("Textures/grass.jpg"));
@@ -214,13 +212,40 @@ void BuildSimulationGeometry(TessellationHelper& tessellationHelperTriangles, Te
     float topZ;
     file >> bottomX >> topZ >> topX >> bottomZ;
     const float maxSize = std::max(abs(bottomX - topX), abs(bottomZ - topZ));
-    root.Init(BoundingBox{-4591.323, 0, -6544.746, -4591.323 + 12238.192, 12238.192, -6544.746 + 12238.192});
+    root.Init(BoundingBox{-4591.323F, 0, -6544.746F, -4591.323F + maxSize, 12238.192F, -6544.746F + maxSize});
     EngineDefaults::BuildTextureUbo();
-    BuildPolygons(file, tessellationHelperTriangles, buildingTexture, true);
+    BuildPolygons(file, tessellationHelperTriangles, buildingTexture, true, colliders);
     file.open("Data/parks_tel_aviv.txt");
-    BuildPolygons(file, tessellationHelperTriangles, grassTexture, false);
+    BuildPolygons(file, tessellationHelperTriangles, grassTexture, false, colliders);
     file.open("Data/roads_tel_aviv.txt");
     BuildLines(file, tessellationHelperLines);
+}
+
+void BuildOctreeAndWaypointGraph(OctreeNode& root, std::vector<BoundingBox>& colliders, Graph& graph)
+{
+    for (BoundingBox& collider : colliders)
+    {
+        root.Insert(collider);
+    }
+    std::vector<OctreeNode*> rootLeaves = root.GetAllLeavesNotColliding();
+    std::ranges::sort(rootLeaves);
+    unordered_map<OctreeNode*, GraphNode*> nodeToGraphNode;
+    for (OctreeNode* leaf : rootLeaves)
+    {
+        GraphNode* node = graph.AddNode(leaf);
+        nodeToGraphNode.emplace(leaf, node);
+    }
+    for (OctreeNode* leaf : rootLeaves)
+    {
+        for (int i = 0; i < 6; i++)
+        {
+            if (OctreeNode* result = leaf->GetNeighborGreaterOrEqual(static_cast<Direction>(i)); result != nullptr && nodeToGraphNode[result] != nullptr)
+            {
+                nodeToGraphNode[leaf]->AddConnection(nodeToGraphNode[result]->GetId());
+                nodeToGraphNode[result]->AddConnection(nodeToGraphNode[leaf]->GetId());
+            }
+        }
+    }
 }
 
 int main(int /*argc*/, char* /*argv*/[])
@@ -239,13 +264,12 @@ int main(int /*argc*/, char* /*argv*/[])
     CameraManager cameraManager{window};
     TessellationHelper worldTessellation{EngineDefaults::GetShader()};
     TessellationHelper linesTessellation{EngineDefaults::GetShader(), GL_LINES};
-    OctreeNode root;
-    BuildSimulationGeometry(worldTessellation, linesTessellation, root);
-    for (BoundingBox& collider : colliders)
-    {
-        root.Insert(collider);
-    }
-    //root.Draw(linesTessellation);
+    OctreeNode root{nullptr};
+    std::vector<BoundingBox> colliders;
+    Graph mainGraph;
+    BuildSimulationGeometry(worldTessellation, linesTessellation, root, colliders);
+    BuildOctreeAndWaypointGraph(root, colliders, mainGraph);
+    mainGraph.Draw(linesTessellation);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);

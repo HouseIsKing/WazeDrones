@@ -4,6 +4,8 @@
 
 #include "BoundingBox.h"
 
+#include <valarray>
+
 float BoundingBox::GetMinX() const
 {
     return MinX;
@@ -176,4 +178,16 @@ float BoundingBox::ClipCollisionZ(const BoundingBox& other, float z) const
         }
     }
     return z;
+}
+
+bool BoundingBox::IsNeighbor(const BoundingBox& other, const float tolerance) const
+{
+    return std::abs(MinX - other.MinX) < tolerance || std::abs(MinY - other.MinY) < tolerance ||
+        std::abs(MinZ - other.MinZ) < tolerance || std::abs(MaxX - other.MaxX) < tolerance ||
+        std::abs(MaxY - other.MaxY) < tolerance || std::abs(MaxZ - other.MaxZ) < tolerance;
+}
+
+float BoundingBox::GetVolume() const
+{
+    return (MaxX - MinX) * (MaxY - MinY) * (MaxZ - MinZ);
 }

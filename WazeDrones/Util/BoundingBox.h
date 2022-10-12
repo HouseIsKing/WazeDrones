@@ -1,7 +1,4 @@
 ﻿#pragma once
-#include <limits>
-
-using std::numeric_limits;
 
 struct BoundingBox
 {
@@ -33,4 +30,6 @@ public:
     [[nodiscard]] float ClipCollisionX(const BoundingBox& other, float x) const;
     [[nodiscard]] float ClipCollisionY(const BoundingBox& other, float y) const;
     [[nodiscard]] float ClipCollisionZ(const BoundingBox& other, float z) const;
+    [[nodiscard]] bool IsNeighbor(const BoundingBox& other, float tolerance) const;
+    [[nodiscard]] float GetVolume() const;
 };
