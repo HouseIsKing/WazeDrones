@@ -1,8 +1,6 @@
 ﻿#include "GraphNode.h"
 
-#include "Graph.h"
-
-GraphNode::GraphNode(Graph* graph, const uint32_t id, const OctreeNode* octreeNodeRepresentative) : OctreeNodeRepresentative(octreeNodeRepresentative), Root(graph), Id(id)
+GraphNode::GraphNode(const uint32_t id, const vec3 position) : GraphNodePosition(position), Id(id)
 {
 }
 
@@ -21,12 +19,12 @@ uint32_t GraphNode::GetId() const
     return Id;
 }
 
-const OctreeNode* GraphNode::GetOctreeNodeRepresentative() const
-{
-    return OctreeNodeRepresentative;
-}
-
 const std::vector<uint32_t>& GraphNode::GetConnections() const
 {
     return Connections;
+}
+
+const vec3& GraphNode::GetPosition() const
+{
+    return GraphNodePosition;
 }

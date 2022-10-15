@@ -3,16 +3,13 @@
 
 #include "OctreeNode.h"
 
-class Graph;
-
 class GraphNode
 {
-    const OctreeNode* OctreeNodeRepresentative;
-    Graph* Root;
+    const vec3 GraphNodePosition;
     const uint32_t Id;
     std::vector<uint32_t> Connections;
 public:
-    GraphNode(Graph* graph, uint32_t id, const OctreeNode* octreeNodeRepresentative);
+    GraphNode(uint32_t id, vec3 position);
     GraphNode(const GraphNode& other) = delete;
     GraphNode(GraphNode&& other) = delete;
     GraphNode& operator=(const GraphNode& other) = delete;
@@ -20,7 +17,7 @@ public:
     void AddConnection(uint32_t node);
     void RemoveConnection(uint32_t node);
     [[nodiscard]] uint32_t GetId() const;
-    [[nodiscard]] const OctreeNode* GetOctreeNodeRepresentative() const;
     [[nodiscard]] const std::vector<uint32_t>& GetConnections() const;
+    [[nodiscard]] const vec3& GetPosition() const;
     ~GraphNode() = default;
 };

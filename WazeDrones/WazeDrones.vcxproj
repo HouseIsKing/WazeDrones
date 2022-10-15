@@ -168,9 +168,11 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CameraManager.cpp" />
+    <ClCompile Include="Entities\Drone.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="Shaders\Shader.cpp" />
     <ClCompile Include="Textures\Texture.cpp" />
+    <ClCompile Include="Util\AStarNode.cpp" />
     <ClCompile Include="Util\BoundingBox.cpp" />
     <ClCompile Include="Util\CustomRandomEngine.cpp" />
     <ClCompile Include="Util\EngineDefaults.cpp">
@@ -257,8 +259,10 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CameraManager.h" />
+    <ClInclude Include="Entities\Drone.h" />
     <ClInclude Include="Shaders\Shader.h" />
     <ClInclude Include="Textures\Texture.h" />
+    <ClInclude Include="Util\AStarNode.h" />
     <ClInclude Include="Util\BoundingBox.h" />
     <ClInclude Include="Util\CustomRandomEngine.h" />
     <ClInclude Include="Util\EngineDefaults.h" />
