@@ -56,6 +56,12 @@ void Transform::SetPosition(const float x, const float y, const float z)
     IsDirty = true;
 }
 
+void Transform::SetPosition(const vec3& position)
+{
+    Position = position;
+    IsDirty = true;
+}
+
 void Transform::Grow(const float x, const float y, const float z)
 {
     Scale.x += x;

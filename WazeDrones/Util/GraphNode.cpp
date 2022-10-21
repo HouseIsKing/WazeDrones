@@ -28,3 +28,9 @@ const vec3& GraphNode::GetPosition() const
 {
     return GraphNodePosition;
 }
+
+float GraphNode::Distance(const GraphNode& other) const
+{
+    const vec3 temp = GraphNodePosition - other.GraphNodePosition;
+    return dot(temp, temp);
+}

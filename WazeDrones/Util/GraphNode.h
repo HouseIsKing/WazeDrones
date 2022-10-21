@@ -19,5 +19,6 @@ public:
     [[nodiscard]] uint32_t GetId() const;
     [[nodiscard]] const std::vector<uint32_t>& GetConnections() const;
     [[nodiscard]] const vec3& GetPosition() const;
+    [[nodiscard]] float Distance(const GraphNode& other) const;
     ~GraphNode() = default;
 };

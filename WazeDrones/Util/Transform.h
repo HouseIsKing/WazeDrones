@@ -22,6 +22,7 @@ public:
     void SetRotation(float x, float y, float z);
     void Move(float x, float y, float z);
     void SetPosition(float x, float y, float z);
+    void SetPosition(const vec3& position);
     void Grow(float x, float y, float z);
     void SetScale(float x, float y, float z);
     mat4x4 GetTransformMatrix();

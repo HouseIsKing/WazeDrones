@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "CameraManager.h"
+#include "Entities/Drone.h"
 #include "Util/Graph.h"
 #include "Util/OctreeNode.h"
 #include "Util/TessellationHelper.h"
@@ -264,24 +265,38 @@ int main(int /*argc*/, char* /*argv*/[])
     CameraManager cameraManager{window};
     TessellationHelper worldTessellation{EngineDefaults::GetShader()};
     TessellationHelper linesTessellation{EngineDefaults::GetShader(), GL_LINES};
+    TessellationHelper linesTessellationDrones{EngineDefaults::GetShader(), GL_LINES};
     OctreeNode root{nullptr};
     std::vector<BoundingBox> colliders;
     Graph mainGraph;
     BuildSimulationGeometry(worldTessellation, linesTessellation, root, colliders);
     BuildOctreeAndWaypointGraph(root, colliders, mainGraph);
-    mainGraph.Draw(linesTessellation);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    std::vector<unique_ptr<Drone>> droneList;
+    droneList.emplace_back(new Drone(mainGraph, 50, 50, 50));
+    droneList[0]->SetDestination(vec3(3200, 90, 3200));
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     while (glfwWindowShouldClose(window) == 0)
     {
+        linesTessellationDrones.Reset();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        if (tickTimer > 1.0 / 144.0)
+        if (tickTimer > 1.0 / 20.0)
         {
-            tickTimer -= 1.0 / 144.0;
-            cameraManager.Tick();
+            for (size_t i = 0; i < droneList.size(); i++)
+            {
+                droneList[i]->Tick(static_cast<float>(tickTimer * 20.0));
+            }
+            tickTimer = 0.0;
         }
+        cameraManager.Tick();
         worldTessellation.Draw();
+        for (size_t i = 0; i < droneList.size(); i++)
+        {
+            droneList[i]->Draw();
+            droneList[i]->DrawPath(linesTessellationDrones);
+            linesTessellationDrones.Draw();
+        }
         glLineWidth(6);
         linesTessellation.Draw();
         glfwSwapBuffers(window);
