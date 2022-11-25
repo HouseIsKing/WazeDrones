@@ -41,4 +41,7 @@ public:
     [[nodiscard]] OctreeNode* GetParent() const;
     [[nodiscard]] OctreeNode* GetNeighborGreaterOrEqual(Direction d) const;
     [[nodiscard]] vec3 GetCenter() const;
+    [[nodiscard]] OctreeNode* GetLeafAt(const vec3& position);
+    [[nodiscard]] bool GetIsColliding() const;
+    [[nodiscard]] OctreeNode* GetChild(Position pos) const;
 };

@@ -1,9 +1,9 @@
 #pragma once
 #include <forward_list>
+#include <queue>
 
 #include "../Util/AStarNode.h"
 #include "../Util/Graph.h"
-#include "../Util/Transform.h"
 struct AStarNode;
 
 class Drone
@@ -13,17 +13,15 @@ class Drone
     Graph DroneGraph;
     GraphNode* Start;
     GraphNode* End;
-    vec3 Destination;
     //vec3 Velocity;
     std::forward_list<const GraphNode*> Path;
     void GenerateTessellationData();
-    void SetupPath();
-    AStarNode* NeighborUpdateAStar(std::unordered_map<GraphNode*, AStarNode*>& cellsSearched, AStarNode* current);
+    AStarNode* NeighborUpdateAStar(std::priority_queue<AStarNode*, std::vector<AStarNode*>, AStarCompare>& cells, std::unordered_map<GraphNode*, unique_ptr<AStarNode>>& cellsSearched, AStarNode* current);
 public:
-    Drone(Graph baseGraph, float x, float y, float z);
+    Drone(Graph baseGraph, float x, float y, float z, uint32_t idNodeStart);
     void Tick(float deltaTime);
     void Draw();
-    void SetDestination(vec3 destination);
+    void SetDestination(uint32_t idNodeEnd);
     void PlanPath();
     void DrawPath(TessellationHelper& lineTessellation);
 };

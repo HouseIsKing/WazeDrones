@@ -419,3 +419,28 @@ vec3 OctreeNode::GetCenter() const
 {
     return vec3{Boundary.GetMinX() + (Boundary.GetMaxX() - Boundary.GetMinX()) / 2.0F, Boundary.GetMinY() + (Boundary.GetMaxY() - Boundary.GetMinY()) / 2.0F, Boundary.GetMinZ() + (Boundary.GetMaxZ() - Boundary.GetMinZ()) / 2.0F};
 }
+
+OctreeNode* OctreeNode::GetLeafAt(const vec3& position)
+{
+    if (Children.at(LeftBottomFront) != nullptr)
+    {
+        for (int p = LeftBottomFront; p <= RightTopBack; p++)
+        {
+            if (Children.at(static_cast<Position>(p))->GetBoundary().IsPointInside(position.x, position.y, position.z))
+            {
+                return Children.at(static_cast<Position>(p))->GetLeafAt(position);
+            }
+        }
+    }
+    return this;
+}
+
+bool OctreeNode::GetIsColliding() const
+{
+    return IsColliding;
+}
+
+OctreeNode* OctreeNode::GetChild(const Position pos) const
+{
+    return Children.at(pos).get();
+}

@@ -12,3 +12,11 @@ struct AStarNode
     {
     }
 };
+
+struct AStarCompare
+{
+    bool operator()(const AStarNode* lhs, const AStarNode* rhs) const
+    {
+        return lhs->G + lhs->H > rhs->G + rhs->H;
+    }
+};

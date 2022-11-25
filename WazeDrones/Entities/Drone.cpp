@@ -4,9 +4,9 @@
 
 #include "../Util/EngineDefaults.h"
 
-Drone::Drone(Graph baseGraph, float x, float y, float z) : Collider(-3.0F, -3.0F, -3.0F, 3.0F, 3.0F, 3.0F),
-                                                           DroneTransform(EngineDefaults::GetShader()), DroneGraph(std::move(baseGraph)),
-                                                           Start(nullptr), End(nullptr), Destination()
+Drone::Drone(Graph baseGraph, const float x, const float y, const float z, const uint32_t idNodeStart) : Collider(-3.0F, -3.0F, -3.0F, 3.0F, 3.0F, 3.0F),
+    DroneTransform(EngineDefaults::GetShader()), DroneGraph(std::move(baseGraph)),
+    Start(DroneGraph.GetNode(idNodeStart)), End(nullptr)
 {
     DroneTransform.GetTransform(0).SetPosition(x, y, z);
     GenerateTessellationData();
@@ -89,60 +89,20 @@ void Drone::Draw()
     DroneTransform.Draw();
 }
 
-void Drone::SetDestination(const vec3 destination)
+void Drone::SetDestination(const uint32_t idNodeEnd)
 {
-    Destination = destination;
+    End = DroneGraph.GetNode(idNodeEnd);
     PlanPath();
 }
 
-void Drone::SetupPath()
-{
-    if (Start != nullptr)
-    {
-        DroneGraph.RemoveNode(Start->GetId());
-    }
-    if (End != nullptr)
-    {
-        DroneGraph.RemoveNode(End->GetId());
-    }
-    Start = DroneGraph.AddNode(DroneTransform.GetTransform(0).GetPosition());
-    End = DroneGraph.AddNode(Destination);
-    float minDistanceStart = std::numeric_limits<float>::max();
-    float minDistanceEnd = std::numeric_limits<float>::max();
-    const GraphNode* closestNodeStart = nullptr;
-    GraphNode* closestNodeEnd = nullptr;
-    for (const auto& node : DroneGraph.GetNodes() | std::views::values)
-    {
-        if (node.get() != Start)
-        {
-            if (vec3 temp = node->GetPosition() - Start->GetPosition(); dot(temp, temp) < minDistanceStart)
-            {
-                minDistanceStart = dot(temp, temp);
-                closestNodeStart = node.get();
-            }
-        }
-        if (node.get() != End)
-        {
-            if (vec3 temp = node->GetPosition() - End->GetPosition(); dot(temp, temp) < minDistanceEnd)
-            {
-                minDistanceEnd = dot(temp, temp);
-                closestNodeEnd = node.get();
-            }
-        }
-    }
-    Start->AddConnection(closestNodeStart->GetId());
-    closestNodeEnd->AddConnection(End->GetId());
-}
-
-AStarNode* Drone::NeighborUpdateAStar(std::unordered_map<GraphNode*, AStarNode*>& cellsSearched, AStarNode* current)
+AStarNode* Drone::NeighborUpdateAStar(std::priority_queue<AStarNode*, std::vector<AStarNode*>, AStarCompare>& cells, std::unordered_map<GraphNode*, unique_ptr<AStarNode>>& cellsSearched, AStarNode* current)
 {
     for (const auto& connection : current->Node->GetConnections())
     {
         GraphNode* neighbor = DroneGraph.GetNode(connection);
         try
         {
-            AStarNode* cell = cellsSearched.at(neighbor);
-            if (cell->G > current->G + neighbor->Distance(*current->Node))
+            if (AStarNode* cell = cellsSearched.at(neighbor).get(); cell->G > current->G + neighbor->Distance(*current->Node))
             {
                 cell->G = current->G + neighbor->Distance(*current->Node);
                 cell->Parent = current;
@@ -151,9 +111,10 @@ AStarNode* Drone::NeighborUpdateAStar(std::unordered_map<GraphNode*, AStarNode*>
         catch (...)
         {
             cellsSearched.emplace(neighbor, new AStarNode(neighbor, current, current->G + neighbor->Distance(*current->Node), neighbor->Distance(*End)));
+            cells.emplace(cellsSearched.at(neighbor).get());
             if (neighbor == End)
             {
-                return cellsSearched.at(neighbor);
+                return cellsSearched.at(neighbor).get();
             }
         }
     }
@@ -162,27 +123,16 @@ AStarNode* Drone::NeighborUpdateAStar(std::unordered_map<GraphNode*, AStarNode*>
 
 void Drone::PlanPath()
 {
-    SetupPath();
-    std::vector<unique_ptr<AStarNode>> cells;
-    std::unordered_map<GraphNode*, AStarNode*> cellsSearched;
-    cells.emplace_back(new AStarNode(Start, nullptr, 0, Start->Distance(*End)));
-    cellsSearched.emplace(Start, cells.back().get());
-    AStarNode* current = nullptr;
+    std::priority_queue<AStarNode*, std::vector<AStarNode*>, AStarCompare> cellQueue;
+    std::unordered_map<GraphNode*, unique_ptr<AStarNode>> cellsSearched;
+    cellsSearched.emplace(Start, new AStarNode(Start, nullptr, 0, Start->Distance(*End)));
+    cellQueue.emplace(cellsSearched.at(Start).get());
     AStarNode* pathFound = nullptr;
     while (pathFound == nullptr)
     {
-        float minScore = std::numeric_limits<float>::max();
-        for (const auto& cell : cellsSearched | std::views::values)
-        {
-            if (cell->G + cell->H < minScore)
-            {
-                minScore = cell->G + cell->H;
-                current = cell;
-            }
-        }
-        const GraphNode* temp = current->Node;
-        pathFound = NeighborUpdateAStar(cellsSearched, current);
-        cellsSearched.erase(const_cast<GraphNode*>(temp));
+        AStarNode* current = cellQueue.top();
+        cellQueue.pop();
+        pathFound = NeighborUpdateAStar(cellQueue, cellsSearched, current);
     }
     while (pathFound->Parent != nullptr)
     {

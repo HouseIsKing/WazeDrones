@@ -44,6 +44,16 @@ float EngineDefaults::GetNextFloat()
     return static_cast<float>(static_cast<double>(CustomRandomEngine::GetNext()) / CustomRandomEngine::M);
 }
 
+int EngineDefaults::GetNextInt(const int min, const int max)
+{
+    return static_cast<int>(CustomRandomEngine::GetNext() % static_cast<unsigned long long>(max)) + min;
+}
+
+int EngineDefaults::GetNextInt(const int max)
+{
+    return GetNextInt(0, max);
+}
+
 uint16_t EngineDefaults::RegisterTexture(Texture* texture)
 {
     HasBuiltTextureUbo = false;

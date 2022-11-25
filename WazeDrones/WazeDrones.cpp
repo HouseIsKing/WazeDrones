@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/vec3.hpp>
 #include <iostream>
+#include <ranges>
 #include <vector>
 
 #include "CameraManager.h"
@@ -222,11 +223,16 @@ void BuildSimulationGeometry(TessellationHelper& tessellationHelperTriangles, Te
     BuildLines(file, tessellationHelperLines);
 }
 
-void BuildOctreeAndWaypointGraph(OctreeNode& root, std::vector<BoundingBox>& colliders, Graph& graph)
+std::vector<GraphNode*> BuildOctreeAndWaypointGraph(OctreeNode& root, std::vector<BoundingBox>& colliders, Graph& graph)
 {
+    std::vector<GraphNode*> helper;
     for (BoundingBox& collider : colliders)
     {
         root.Insert(collider);
+        if (collider.GetMaxX() - collider.GetMinX() > 1.0F && collider.GetMaxZ() - collider.GetMinZ() > 1.0F)
+        {
+            helper.push_back(graph.AddNode(vec3((collider.GetMaxX() - collider.GetMinX()) / 2.0F + collider.GetMinX(), collider.GetMaxY() + 0.5F, (collider.GetMaxZ() - collider.GetMinZ()) / 2.0F + collider.GetMinZ())));
+        }
     }
     std::vector<OctreeNode*> rootLeaves = root.GetAllLeavesNotColliding();
     std::ranges::sort(rootLeaves);
@@ -247,6 +253,42 @@ void BuildOctreeAndWaypointGraph(OctreeNode& root, std::vector<BoundingBox>& col
             }
         }
     }
+    for (GraphNode* node : helper)
+    {
+        OctreeNode* leaf = root.GetLeafAt(node->GetPosition());
+        if (!leaf->GetIsColliding())
+        {
+            node->AddConnection(nodeToGraphNode[leaf]->GetId());
+            nodeToGraphNode[leaf]->AddConnection(node->GetId());
+            continue;
+        }
+        bool found = false;
+        while (!found)
+        {
+            if (leaf->GetParent() == nullptr)
+            {
+                break;
+            }
+            leaf = leaf->GetParent();
+            float distance = std::numeric_limits<float>::max();
+            GraphNode* closest = nullptr;
+            for (int i = 0; i < 6; i++)
+            {
+                if (OctreeNode* child = leaf->GetChild(static_cast<Position>(i)); !child->GetIsColliding() && node->Distance(*nodeToGraphNode[child]) < distance)
+                {
+                    closest = nodeToGraphNode[child];
+                    distance = node->Distance(*nodeToGraphNode[child]);
+                    found = true;
+                }
+            }
+            if (found)
+            {
+                node->AddConnection(closest->GetId());
+                closest->AddConnection(node->GetId());
+            }
+        }
+    }
+    return helper;
 }
 
 int main(int /*argc*/, char* /*argv*/[])
@@ -270,11 +312,16 @@ int main(int /*argc*/, char* /*argv*/[])
     std::vector<BoundingBox> colliders;
     Graph mainGraph;
     BuildSimulationGeometry(worldTessellation, linesTessellation, root, colliders);
-    BuildOctreeAndWaypointGraph(root, colliders, mainGraph);
+    std::vector<GraphNode*> startEndPos = BuildOctreeAndWaypointGraph(root, colliders, mainGraph);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     std::vector<unique_ptr<Drone>> droneList;
-    droneList.emplace_back(new Drone(mainGraph, 50, 50, 50));
-    droneList[0]->SetDestination(vec3(3200, 90, 3200));
+    for (int i = 0; i < 200; i++)
+    {
+        GraphNode* node = startEndPos[EngineDefaults::GetNextInt(startEndPos.size())];
+        vec3 pos = node->GetPosition();
+        droneList.emplace_back(new Drone(mainGraph, pos.x, pos.y, pos.z, node->GetId()));
+        droneList.back()->SetDestination(startEndPos[EngineDefaults::GetNextInt(startEndPos.size())]->GetId());
+    }
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     while (glfwWindowShouldClose(window) == 0)
@@ -283,20 +330,20 @@ int main(int /*argc*/, char* /*argv*/[])
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         if (tickTimer > 1.0 / 20.0)
         {
-            for (size_t i = 0; i < droneList.size(); i++)
+            for (auto& i : droneList)
             {
-                droneList[i]->Tick(static_cast<float>(tickTimer * 20.0));
+                i->Tick(static_cast<float>(tickTimer * 20.0));
             }
             tickTimer = 0.0;
         }
         cameraManager.Tick();
         worldTessellation.Draw();
-        for (size_t i = 0; i < droneList.size(); i++)
+        for (auto& i : droneList)
         {
-            droneList[i]->Draw();
-            droneList[i]->DrawPath(linesTessellationDrones);
-            linesTessellationDrones.Draw();
+            i->Draw();
+            //i->DrawPath(linesTessellationDrones);
         }
+        linesTessellationDrones.Draw();
         glLineWidth(6);
         linesTessellation.Draw();
         glfwSwapBuffers(window);

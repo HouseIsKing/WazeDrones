@@ -24,6 +24,8 @@ public:
     template <typename T>
     static T GetNext(T minValue, T maxValue);
     static float GetNextFloat();
+    static int GetNextInt(int min, int max);
+    static int GetNextInt(int max);
     static uint16_t RegisterTexture(Texture* texture);
     static void BuildTextureUbo();
     static void ResetTextures();
