@@ -9,7 +9,7 @@ class CameraManager
     GLFWwindow* Window;
     float PrevMouseX;
     float PrevMouseY;
-    float MouseSensitivity = 0.1F;
+    float MouseSensitivity = 0.05F;
 public:
     explicit CameraManager(GLFWwindow* window);
     void Tick();

@@ -255,6 +255,7 @@
     <ClCompile Include="Util\Transform.cpp" />
     <ClCompile Include="Util\Vertex.cpp" />
     <ClCompile Include="WazeDrones.cpp" />
+    <ClCompile Include="WorldManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -272,6 +273,7 @@
     <ClInclude Include="Util\TessellationHelper.h" />
     <ClInclude Include="Util\Transform.h" />
     <ClInclude Include="Util\Vertex.h" />
+    <ClInclude Include="WorldManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Data\buildings_tel_aviv.txt">

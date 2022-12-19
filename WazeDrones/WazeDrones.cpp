@@ -12,6 +12,7 @@
 #include "Util/Graph.h"
 #include "Util/OctreeNode.h"
 #include "Util/TessellationHelper.h"
+#include "WorldManager.h"
 
 void FramebufferSizeCallback(GLFWwindow* /*window*/, const int width, const int height)
 {
@@ -308,19 +309,17 @@ int main(int /*argc*/, char* /*argv*/[])
     TessellationHelper worldTessellation{EngineDefaults::GetShader()};
     TessellationHelper linesTessellation{EngineDefaults::GetShader(), GL_LINES};
     TessellationHelper linesTessellationDrones{EngineDefaults::GetShader(), GL_LINES};
-    OctreeNode root{nullptr};
     std::vector<BoundingBox> colliders;
-    Graph mainGraph;
-    BuildSimulationGeometry(worldTessellation, linesTessellation, root, colliders);
-    std::vector<GraphNode*> startEndPos = BuildOctreeAndWaypointGraph(root, colliders, mainGraph);
+    WorldManager worldManager;
+    BuildSimulationGeometry(worldTessellation, linesTessellation, *worldManager.GetRoot(), colliders);
+    std::vector<GraphNode*> startEndPos = BuildOctreeAndWaypointGraph(*worldManager.GetRoot(), colliders, *worldManager.GetGraph());
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    std::vector<unique_ptr<Drone>> droneList;
-    for (int i = 0; i < 200; i++)
+    for (int i = 0; i < 20000; i++)
     {
-        GraphNode* node = startEndPos[EngineDefaults::GetNextInt(startEndPos.size())];
-        vec3 pos = node->GetPosition();
-        droneList.emplace_back(new Drone(mainGraph, pos.x, pos.y, pos.z, node->GetId()));
-        droneList.back()->SetDestination(startEndPos[EngineDefaults::GetNextInt(startEndPos.size())]->GetId());
+        GraphNode* node = startEndPos[static_cast<size_t>(EngineDefaults::GetNextInt(static_cast<int>(startEndPos.size())))];
+        auto* drone = new Drone(&worldManager, node->GetId());
+        worldManager.AddDrone(drone);
+        drone->SetDestination(startEndPos[static_cast<size_t>(EngineDefaults::GetNextInt(static_cast<int>(startEndPos.size())))]->GetId());
     }
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
@@ -330,19 +329,12 @@ int main(int /*argc*/, char* /*argv*/[])
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         if (tickTimer > 1.0 / 20.0)
         {
-            for (auto& i : droneList)
-            {
-                i->Tick(static_cast<float>(tickTimer * 20.0));
-            }
+            worldManager.Tick(tickTimer);
             tickTimer = 0.0;
         }
         cameraManager.Tick();
         worldTessellation.Draw();
-        for (auto& i : droneList)
-        {
-            i->Draw();
-            //i->DrawPath(linesTessellationDrones);
-        }
+        worldManager.Draw();
         linesTessellationDrones.Draw();
         glLineWidth(6);
         linesTessellation.Draw();

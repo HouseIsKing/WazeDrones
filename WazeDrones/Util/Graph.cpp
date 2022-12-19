@@ -7,6 +7,11 @@ GraphNode* Graph::GetNode(const uint32_t id)
     return Nodes[id].get();
 }
 
+/**
+ * \brief Adds a node to the graph
+ * \param representativeNode Octree node that represents the graph node
+ * \return The newly created graph node
+ */
 GraphNode* Graph::AddNode(const OctreeNode* representativeNode)
 {
     uint32_t id;
@@ -23,6 +28,11 @@ GraphNode* Graph::AddNode(const OctreeNode* representativeNode)
     return Nodes[id].get();
 }
 
+/**
+ * \brief Adds a node to the graph
+ * \param position Position of the node
+ * \return The newly created graph node
+ */
 GraphNode* Graph::AddNode(const vec3 position)
 {
     uint32_t id;
@@ -39,6 +49,10 @@ GraphNode* Graph::AddNode(const vec3 position)
     return Nodes[id].get();
 }
 
+/**
+ * \brief Removes a node from the graph according to its id
+ * \param id Node ID
+ */
 void Graph::RemoveNode(uint32_t id)
 {
     try
@@ -55,6 +69,10 @@ void Graph::RemoveNode(uint32_t id)
     }
 }
 
+/**
+ * \brief Draws the graph with all it's connections.
+ * \param lineTessellation Drawing tool
+ */
 void Graph::Draw(TessellationHelper& lineTessellation)
 {
     unordered_map<GraphNode*, uint32_t> nodeToIndex;

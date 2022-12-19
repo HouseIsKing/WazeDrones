@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include "../Textures/Texture.h"
 #include "../Shaders/Shader.h"
+#include "../Textures/Texture.h"
 #include "CustomRandomEngine.h"
 #include <array>
 
@@ -16,8 +16,8 @@ class EngineDefaults
     static bool HasInit;
     static void Init();
     static CustomRandomEngine Engine;
+
 public:
-    static float ConvertLightLevelToAmbient(int lightLevel);
     static Shader* GetShader();
     template <typename T>
     static T GetNext(T maxValue);

@@ -7,6 +7,11 @@ using std::runtime_error;
 using std::piecewise_construct;
 using std::forward_as_tuple;
 
+/**
+ * \brief Texture constructor
+ * \param path Path to image to build texture from.
+ * \return Texture pointer to the newly created texture.
+ */
 Texture* Texture::LoadTexture(const string& path)
 {
     if (TexturesCache.contains(path))

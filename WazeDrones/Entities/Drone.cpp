@@ -3,15 +3,24 @@
 #include <ranges>
 
 #include "../Util/EngineDefaults.h"
+#include "../WorldManager.h"
 
-Drone::Drone(Graph baseGraph, const float x, const float y, const float z, const uint32_t idNodeStart) : Collider(-3.0F, -3.0F, -3.0F, 3.0F, 3.0F, 3.0F),
-    DroneTransform(EngineDefaults::GetShader()), DroneGraph(std::move(baseGraph)),
-    Start(DroneGraph.GetNode(idNodeStart)), End(nullptr)
+/**
+ * \brief Drone constructor generates tessellation of drone body
+ * \param worldManager World drone exists in
+ * \param idNodeStart Start node
+ */
+Drone::Drone(WorldManager* worldManager, const uint32_t idNodeStart) : Collider(-0.5F, -0.5F, -0.5F, 0.5F, 0.5F, 0.5F),
+                                                                       DroneTransform(EngineDefaults::GetShader()), World(worldManager),
+                                                                       Start(World->GetGraph()->GetNode(idNodeStart)), End(nullptr)
 {
-    DroneTransform.GetTransform(0).SetPosition(x, y, z);
+    DroneTransform.GetTransform(0).SetPosition(Start->GetPosition());
     GenerateTessellationData();
 }
 
+/**
+ * \brief Drone body tessellation data
+ */
 void Drone::GenerateTessellationData()
 {
     const uint32_t index1 = DroneTransform.AddVertex(Vertex(Collider.GetMinX(), Collider.GetMinY(), Collider.GetMinZ(), 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1));
@@ -60,6 +69,9 @@ void Drone::GenerateTessellationData()
     DroneTransform.AddTriangle(index8);
 }
 
+/**
+ * \brief Drone tick function, updates drone position according to path. And updates path if needed.
+ */
 void Drone::Tick(const float deltaTime)
 {
     if (Path.empty())
@@ -82,6 +94,42 @@ void Drone::Tick(const float deltaTime)
         currentPos = DroneTransform.GetTransform(0).GetPosition();
     }
     DroneTransform.GetTransform(0).SetPosition(currentPos + normalize(currentGoal - currentPos) * (deltaTime * 0.41665F - distanceFactor));
+    const vec3 center = DroneTransform.GetTransform(0).GetPosition();
+    constexpr float x = 15.0F;
+    const std::array<vec3, 8> corners = {
+        vec3(center.x - x, center.y - x, center.z - x), vec3(center.x + x, center.y - x, center.z - x),
+        vec3(center.x + x, center.y + x, center.z - x), vec3(center.x - x, center.y + x, center.z - x),
+        vec3(center.x - x, center.y - x, center.z + x), vec3(center.x + x, center.y - x, center.z + x),
+        vec3(center.x + x, center.y + x, center.z + x), vec3(center.x - x, center.y + x, center.z + x)
+    };
+    for (auto& val : OctreeList | std::views::values)
+    {
+        val = false;
+    }
+    for (uint32_t i = 0; i < 8; ++i)
+    {
+        if (OctreeNode* node = World->GetRoot()->GetLeafAt(corners[i]); OctreeList.emplace(node, true).second)
+        {
+            node->AddDrone(this);
+        }
+        else
+        {
+            OctreeList[node] = true;
+        }
+    }
+    std::vector<OctreeNode*> helper;
+    for (auto& [node, isInside] : OctreeList)
+    {
+        if (!isInside)
+        {
+            helper.push_back(node);
+        }
+    }
+    for (OctreeNode* node : helper)
+    {
+        node->RemoveDrone(this);
+        OctreeList.erase(node);
+    }
 }
 
 void Drone::Draw()
@@ -89,17 +137,28 @@ void Drone::Draw()
     DroneTransform.Draw();
 }
 
+/**
+ * \brief Plans path according to end node given.
+ * \param idNodeEnd End node(goal)
+ */
 void Drone::SetDestination(const uint32_t idNodeEnd)
 {
-    End = DroneGraph.GetNode(idNodeEnd);
+    End = World->GetGraph()->GetNode(idNodeEnd);
     PlanPath();
 }
 
-AStarNode* Drone::NeighborUpdateAStar(std::priority_queue<AStarNode*, std::vector<AStarNode*>, AStarCompare>& cells, std::unordered_map<GraphNode*, unique_ptr<AStarNode>>& cellsSearched, AStarNode* current)
+/**
+ * \brief Searches all neighbors of current node and add/updates them on the priority queue.
+ * \param cells Current cells queue(used for picking next cell to search)
+ * \param cellsSearched All the cells that have been searched
+ * \param current Current cell being searched
+ * \return The end A* node if found the goal, nullptr otherwise
+ */
+AStarNode* Drone::NeighborUpdateAStar(std::priority_queue<AStarNode*, std::vector<AStarNode*>, AStarCompare>& cells, std::unordered_map<GraphNode*, unique_ptr<AStarNode>>& cellsSearched, AStarNode* current) const
 {
     for (const auto& connection : current->Node->GetConnections())
     {
-        GraphNode* neighbor = DroneGraph.GetNode(connection);
+        GraphNode* neighbor = World->GetGraph()->GetNode(connection);
         try
         {
             if (AStarNode* cell = cellsSearched.at(neighbor).get(); cell->G > current->G + neighbor->Distance(*current->Node))
@@ -121,6 +180,9 @@ AStarNode* Drone::NeighborUpdateAStar(std::priority_queue<AStarNode*, std::vecto
     return nullptr;
 }
 
+/**
+ * \brief Plans path using A* algorithm.
+ */
 void Drone::PlanPath()
 {
     std::priority_queue<AStarNode*, std::vector<AStarNode*>, AStarCompare> cellQueue;
@@ -141,6 +203,10 @@ void Drone::PlanPath()
     }
 }
 
+/**
+ * \brief Draws the current path of the drone.
+ * \param lineTessellation Drawing tool
+ */
 void Drone::DrawPath(TessellationHelper& lineTessellation)
 {
     if (Path.empty())

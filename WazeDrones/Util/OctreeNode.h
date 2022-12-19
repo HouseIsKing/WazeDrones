@@ -5,6 +5,8 @@
 #include "BoundingBox.h"
 #include "TessellationHelper.h"
 
+class Drone;
+
 enum Direction { Left, Right, Up, Down, Front, Back };
 
 enum Position { LeftBottomFront, LeftBottomBack, LeftTopFront, LeftTopBack, RightBottomFront, RightBottomBack, RightTopFront, RightTopBack };
@@ -15,6 +17,7 @@ class OctreeNode
     BoundingBox Boundary;
     bool IsColliding;
     std::unordered_map<Position, std::unique_ptr<OctreeNode>> Children;
+    std::vector<Drone*> DronesInsideNode;
     inline static float MinSize = 20.0F;
     static BoundingBox GetChildrenBound(const BoundingBox& boundary, int boundingBoxIndex);
     [[nodiscard]] Position GetPosition() const;
@@ -24,6 +27,7 @@ class OctreeNode
     [[nodiscard]] OctreeNode* GetNeighborGreaterOrEqualDown() const;
     [[nodiscard]] OctreeNode* GetNeighborGreaterOrEqualFront() const;
     [[nodiscard]] OctreeNode* GetNeighborGreaterOrEqualBack() const;
+
 public:
     std::vector<OctreeNode*> GetAllLeavesNotColliding();
     explicit OctreeNode(BoundingBox boundary, OctreeNode* parent);
@@ -44,4 +48,6 @@ public:
     [[nodiscard]] OctreeNode* GetLeafAt(const vec3& position);
     [[nodiscard]] bool GetIsColliding() const;
     [[nodiscard]] OctreeNode* GetChild(Position pos) const;
+    void AddDrone(Drone* drone);
+    void RemoveDrone(Drone* drone);
 };

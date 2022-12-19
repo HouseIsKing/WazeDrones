@@ -30,15 +30,6 @@ void EngineDefaults::Init()
     glGenBuffers(1, &UboTextures);
 }
 
-float EngineDefaults::ConvertLightLevelToAmbient(const int lightLevel)
-{
-    if (lightLevel == 0)
-    {
-        return 0.6F;
-    }
-    return 1.0F;
-}
-
 float EngineDefaults::GetNextFloat()
 {
     return static_cast<float>(static_cast<double>(CustomRandomEngine::GetNext()) / CustomRandomEngine::M);

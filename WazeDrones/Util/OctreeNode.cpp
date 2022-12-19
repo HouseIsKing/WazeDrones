@@ -3,6 +3,12 @@
 #include <memory>
 #include <ranges>
 
+/**
+ * \brief Returns the bounding box of a child corresponding to the bounding box of the parent and the index of the child.
+ * \param boundary Current boundary of the node
+ * \param boundingBoxIndex Index of the bounding box(Index of child)
+ * \return Bounding box of the child
+ */
 BoundingBox OctreeNode::GetChildrenBound(const BoundingBox& boundary, const int boundingBoxIndex)
 {
     const float x = abs(boundary.GetMinX() - boundary.GetMaxX()) / 2;
@@ -31,6 +37,10 @@ BoundingBox OctreeNode::GetChildrenBound(const BoundingBox& boundary, const int 
     }
 }
 
+/**
+ * \brief Returns child position(Index) relative to parent.
+ * \return Child position relative to parent
+ */
 Position OctreeNode::GetPosition() const
 {
     if (Parent != nullptr)
@@ -46,6 +56,10 @@ Position OctreeNode::GetPosition() const
     return Position{};
 }
 
+/**
+ * \brief Recursive function that looks for the left neighbor of the current node.
+ * \return Neighbor that is bigger or at the same level as the node which the function activated on the left side
+ */
 OctreeNode* OctreeNode::GetNeighborGreaterOrEqualLeft() const
 {
     if (Parent == nullptr)
@@ -84,6 +98,10 @@ OctreeNode* OctreeNode::GetNeighborGreaterOrEqualLeft() const
     }
 }
 
+/**
+ * \brief Recursive function that looks for the right neighbor of the current node.
+ * \return Neighbor that is bigger or at the same level as the node which the function activated on the right side
+ */
 OctreeNode* OctreeNode::GetNeighborGreaterOrEqualRight() const
 {
     if (Parent == nullptr)
@@ -122,6 +140,10 @@ OctreeNode* OctreeNode::GetNeighborGreaterOrEqualRight() const
     }
 }
 
+/**
+ * \brief Recursive function that looks for the up neighbor of the current node.
+ * \return Neighbor that is bigger or at the same level as the node which the function activated on the up side
+ */
 OctreeNode* OctreeNode::GetNeighborGreaterOrEqualUp() const
 {
     if (Parent == nullptr)
@@ -160,6 +182,10 @@ OctreeNode* OctreeNode::GetNeighborGreaterOrEqualUp() const
     }
 }
 
+/**
+ * \brief Recursive function that looks for the down neighbor of the current node.
+ * \return Neighbor that is bigger or at the same level as the node which the function activated on the down side
+ */
 OctreeNode* OctreeNode::GetNeighborGreaterOrEqualDown() const
 {
     if (Parent == nullptr)
@@ -198,6 +224,10 @@ OctreeNode* OctreeNode::GetNeighborGreaterOrEqualDown() const
     }
 }
 
+/**
+ * \brief Recursive function that looks for the front neighbor of the current node.
+ * \return Neighbor that is bigger or at the same level as the node which the function activated on the front side
+ */
 OctreeNode* OctreeNode::GetNeighborGreaterOrEqualFront() const
 {
     if (Parent == nullptr)
@@ -236,6 +266,10 @@ OctreeNode* OctreeNode::GetNeighborGreaterOrEqualFront() const
     }
 }
 
+/**
+ * \brief Recursive function that looks for the back neighbor of the current node.
+ * \return Neighbor that is bigger or at the same level as the node which the function activated on the back side
+ */
 OctreeNode* OctreeNode::GetNeighborGreaterOrEqualBack() const
 {
     if (Parent == nullptr)
@@ -274,6 +308,10 @@ OctreeNode* OctreeNode::GetNeighborGreaterOrEqualBack() const
     }
 }
 
+/**
+ * \brief Returns a list of all the leaves that are not colliding with anything(in the city)
+ * \return List of leaves that have no collision
+ */
 std::vector<OctreeNode*> OctreeNode::GetAllLeavesNotColliding()
 {
     std::vector<OctreeNode*> leaves;
@@ -309,6 +347,10 @@ bool OctreeNode::operator<(const OctreeNode& other) const
     return Boundary.GetVolume() < other.Boundary.GetVolume();
 }
 
+/**
+ * \brief Inserts a collider box into the octree and updates it accordingly
+ * \param box Collider box
+ */
 void OctreeNode::Insert(const BoundingBox& box)
 {
     if (box.IsIntersecting(Boundary))
@@ -333,6 +375,10 @@ BoundingBox OctreeNode::GetBoundary() const
     return Boundary;
 }
 
+/**
+ * \brief Draws the entire octree(only for debugging)
+ * \param lineTessellation Drawing tool
+ */
 void OctreeNode::Draw(TessellationHelper& lineTessellation) const
 {
     if (Children.at(LeftBottomFront) != nullptr)
@@ -395,6 +441,11 @@ OctreeNode* OctreeNode::GetParent() const
     return Parent;
 }
 
+/**
+ * \brief Returns neighbor octree node in the given direction(Neighbor has to be bigger or equal than this node)
+ * \param d Direction to look for neighbor
+ * \return Neighbor in the direction speicified
+ */
 OctreeNode* OctreeNode::GetNeighborGreaterOrEqual(const Direction d) const
 {
     switch (d)
@@ -420,6 +471,11 @@ vec3 OctreeNode::GetCenter() const
     return vec3{Boundary.GetMinX() + (Boundary.GetMaxX() - Boundary.GetMinX()) / 2.0F, Boundary.GetMinY() + (Boundary.GetMaxY() - Boundary.GetMinY()) / 2.0F, Boundary.GetMinZ() + (Boundary.GetMaxZ() - Boundary.GetMinZ()) / 2.0F};
 }
 
+/**
+ * \brief Returns leaf closest to a given point.
+ * \param position Position of point
+ * \return Octree node closest to the given point
+ */
 OctreeNode* OctreeNode::GetLeafAt(const vec3& position)
 {
     if (Children.at(LeftBottomFront) != nullptr)
@@ -443,4 +499,14 @@ bool OctreeNode::GetIsColliding() const
 OctreeNode* OctreeNode::GetChild(const Position pos) const
 {
     return Children.at(pos).get();
+}
+
+void OctreeNode::AddDrone(Drone* drone)
+{
+    DronesInsideNode.push_back(drone);
+}
+
+void OctreeNode::RemoveDrone(Drone* drone)
+{
+    std::erase(DronesInsideNode, drone);
 }

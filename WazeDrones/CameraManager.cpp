@@ -9,22 +9,22 @@ void CameraManager::Tick()
     int state = glfwGetKey(Window, GLFW_KEY_W);
     if (state == GLFW_PRESS)
     {
-        CameraInstance.Position += CameraInstance.GetFrontVector() * 50.0F;
+        CameraInstance.Position += CameraInstance.GetFrontVector() * 5.0F;
     }
     state = glfwGetKey(Window, GLFW_KEY_S);
     if (state == GLFW_PRESS)
     {
-        CameraInstance.Position -= CameraInstance.GetFrontVector() * 50.0F;
+        CameraInstance.Position -= CameraInstance.GetFrontVector() * 5.0F;
     }
     state = glfwGetKey(Window, GLFW_KEY_A);
     if (state == GLFW_PRESS)
     {
-        CameraInstance.Position -= CameraInstance.GetRightVector() * 50.0F;
+        CameraInstance.Position -= CameraInstance.GetRightVector() * 5.0F;
     }
     state = glfwGetKey(Window, GLFW_KEY_D);
     if (state == GLFW_PRESS)
     {
-        CameraInstance.Position += CameraInstance.GetRightVector() * 50.0F;
+        CameraInstance.Position += CameraInstance.GetRightVector() * 5.0F;
     }
     double x;
     double y;

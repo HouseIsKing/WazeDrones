@@ -1,13 +1,13 @@
-﻿//
-// Created by amit on 4/22/2022.
-//
-
-#include "Shader.h"
+﻿#include "Shader.h"
 
 #include <array>
 #include <fstream>
 #include <sstream>
 
+/**
+ * \brief Compiles an OpenGL shader
+ * \param shader Shader ID
+ */
 void Shader::CompileShader(const GLuint shader)
 {
     glCompileShader(shader);
@@ -22,6 +22,10 @@ void Shader::CompileShader(const GLuint shader)
     }
 }
 
+/**
+ * \brief Links an OpenGL program
+ * \param program Program ID
+ */
 void Shader::LinkProgram(const GLuint program)
 {
     glLinkProgram(program);
@@ -36,6 +40,11 @@ void Shader::LinkProgram(const GLuint program)
     }
 }
 
+/**
+ * \brief Constructs a shader from a file
+ * \param vertPath Vertex shader path.
+ * \param fragPath Fragment shader path.
+ */
 Shader::Shader(const string& vertPath, const string& fragPath) : Program(glCreateProgram())
 {
     string vertCode;
@@ -99,11 +108,19 @@ Shader::Shader(const string& vertPath, const string& fragPath) : Program(glCreat
     }
 }
 
+/**
+ * \brief Uses the shader
+ */
 void Shader::Use() const
 {
     glUseProgram(Program);
 }
 
+/**
+ * \brief Gets attribute ID
+ * \param name Name of attribute
+ * \return ID of attribute
+ */
 GLuint Shader::GetAttribLocation(const string& name) const
 {
     return glGetAttribLocation(Program, name.c_str());
