@@ -50,4 +50,5 @@ public:
     [[nodiscard]] OctreeNode* GetChild(Position pos) const;
     void AddDrone(Drone* drone);
     void RemoveDrone(Drone* drone);
+    [[nodiscard]] const std::vector<Drone*>& GetDronesInsideNode() const;
 };

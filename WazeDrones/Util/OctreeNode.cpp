@@ -510,3 +510,8 @@ void OctreeNode::RemoveDrone(Drone* drone)
 {
     std::erase(DronesInsideNode, drone);
 }
+
+const std::vector<Drone*>& OctreeNode::GetDronesInsideNode() const
+{
+    return DronesInsideNode;
+}

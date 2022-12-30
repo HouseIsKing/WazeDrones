@@ -1,7 +1,7 @@
 #include "Drone.h"
 
 #include <ranges>
-
+#include <cmath>
 #include "../Util/EngineDefaults.h"
 #include "../WorldManager.h"
 
@@ -12,7 +12,7 @@
  */
 Drone::Drone(WorldManager* worldManager, const uint32_t idNodeStart) : Collider(-0.5F, -0.5F, -0.5F, 0.5F, 0.5F, 0.5F),
                                                                        DroneTransform(EngineDefaults::GetShader()), World(worldManager),
-                                                                       Start(World->GetGraph()->GetNode(idNodeStart)), End(nullptr)
+                                                                       Start(World->GetGraph()->GetNode(idNodeStart)), End(nullptr), UpOffset(0)
 {
     DroneTransform.GetTransform(0).SetPosition(Start->GetPosition());
     GenerateTessellationData();
@@ -78,7 +78,9 @@ void Drone::Tick(const float deltaTime)
     {
         return;
     }
+    constexpr float x = 15.0F;
     vec3 currentGoal = Path.front()->GetPosition();
+    currentGoal.y += static_cast<float>(UpOffset) * x;
     vec3 currentPos = DroneTransform.GetTransform(0).GetPosition();
     float distanceFactor = 0.0F;
     if (const float temp = distance(currentPos, currentGoal); temp < deltaTime * 0.41665F)
@@ -88,14 +90,15 @@ void Drone::Tick(const float deltaTime)
         Path.pop_front();
         if (Path.empty())
         {
+            UpOffset = -1;
             return;
         }
         currentGoal = Path.front()->GetPosition();
+        currentGoal.y += static_cast<float>(UpOffset) * x;
         currentPos = DroneTransform.GetTransform(0).GetPosition();
     }
     DroneTransform.GetTransform(0).SetPosition(currentPos + normalize(currentGoal - currentPos) * (deltaTime * 0.41665F - distanceFactor));
     const vec3 center = DroneTransform.GetTransform(0).GetPosition();
-    constexpr float x = 15.0F;
     const std::array<vec3, 8> corners = {
         vec3(center.x - x, center.y - x, center.z - x), vec3(center.x + x, center.y - x, center.z - x),
         vec3(center.x + x, center.y + x, center.z - x), vec3(center.x - x, center.y + x, center.z - x),
@@ -130,6 +133,76 @@ void Drone::Tick(const float deltaTime)
         node->RemoveDrone(this);
         OctreeList.erase(node);
     }
+    for (const auto& node : OctreeList | std::views::keys)
+    {
+        for (Drone* drone : node->GetDronesInsideNode())
+        {
+            if (drone != this)
+            {
+                AddDroneCollision(drone);
+            }
+        }
+    }
+    std::vector<Drone*> temp;
+    for (Drone* drone : DroneList)
+    {
+        if (drone->GetDistanceFromNoY(DroneTransform.GetTransform(0).GetPosition()) > x * x * 2)
+        {
+            //std::cout << "hello";
+            temp.push_back(drone);
+        }
+    }
+    for (Drone* drone : temp)
+    {
+        DroneList.erase(drone);
+    }
+    std::unordered_map<int, bool> offsetsAllowed;
+    offsetsAllowed.reserve(10);
+    for (int i = 0; i < 10; i++)
+    {
+        offsetsAllowed.emplace(i, true);
+    }
+    for (const Drone* drone : DroneList)
+    {
+        if (drone->UpOffset != -1)
+        {
+            offsetsAllowed[drone->GetUpOffset()] = false;
+        }
+    }
+    for (int i = 0; i < 10; i++)
+    {
+        if (offsetsAllowed[i])
+        {
+            UpOffset = i;
+            break;
+        }
+    }
+    if (!DroneList.empty())
+    {
+        //std::cout << this << "     " << UpOffset << std::endl;
+    }
+}
+
+int Drone::GetUpOffset() const
+{
+    return UpOffset;
+}
+
+float Drone::GetDistanceFromNoY(const vec3& point)
+{
+    const vec3 temp = DroneTransform.GetTransform(0).GetPosition() - point;
+    const auto temp2 = vec2(temp.x, temp.z);
+    return dot(temp2, temp2);
+}
+
+void Drone::AddDroneCollision(Drone* drone)
+{
+    DroneList.emplace(drone);
+}
+
+void Drone::RemoveDroneCollision(Drone* drone)
+{
+    DroneList.erase(drone);
 }
 
 void Drone::Draw()

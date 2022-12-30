@@ -314,7 +314,7 @@ int main(int /*argc*/, char* /*argv*/[])
     BuildSimulationGeometry(worldTessellation, linesTessellation, *worldManager.GetRoot(), colliders);
     std::vector<GraphNode*> startEndPos = BuildOctreeAndWaypointGraph(*worldManager.GetRoot(), colliders, *worldManager.GetGraph());
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    for (int i = 0; i < 20000; i++)
+    for (int i = 0; i < 2000; i++)
     {
         GraphNode* node = startEndPos[static_cast<size_t>(EngineDefaults::GetNextInt(static_cast<int>(startEndPos.size())))];
         auto* drone = new Drone(&worldManager, node->GetId());
