@@ -8,6 +8,7 @@ class GraphNode
     const vec3 GraphNodePosition;
     const uint32_t Id;
     std::vector<uint32_t> Connections;
+
 public:
     GraphNode(uint32_t id, vec3 position);
     GraphNode(const GraphNode& other) = delete;

@@ -19,7 +19,11 @@ class Drone
     int UpOffset;
     //vec3 Velocity;
     std::forward_list<const GraphNode*> Path;
+    unique_ptr<GraphNode> Temp;
+    vec3 PreviousTarget;
     void GenerateTessellationData();
+    void ForceClimbUp();
+    void ForceClimbDown();
     AStarNode* NeighborUpdateAStar(std::priority_queue<AStarNode*, std::vector<AStarNode*>, AStarCompare>& cells, std::unordered_map<GraphNode*, unique_ptr<AStarNode>>& cellsSearched, AStarNode* current) const;
 
 public:
