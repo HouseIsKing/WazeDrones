@@ -304,7 +304,6 @@ int main(int /*argc*/, char* /*argv*/[])
     int counter = 0;
     double timePassed = 0.0;
     double tickTimer = 0.0;
-    double timePrev = glfwGetTime();
     CameraManager cameraManager{window};
     TessellationHelper worldTessellation{EngineDefaults::GetShader()};
     TessellationHelper linesTessellation{EngineDefaults::GetShader(), GL_LINES};
@@ -314,15 +313,27 @@ int main(int /*argc*/, char* /*argv*/[])
     BuildSimulationGeometry(worldTessellation, linesTessellation, *worldManager.GetRoot(), colliders);
     std::vector<GraphNode*> startEndPos = BuildOctreeAndWaypointGraph(*worldManager.GetRoot(), colliders, *worldManager.GetGraph());
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    std::unordered_set<uint32_t> spawnedLocationsUsed{};
     for (int i = 0; i < 2000; i++)
     {
         GraphNode* node = startEndPos[static_cast<size_t>(EngineDefaults::GetNextInt(static_cast<int>(startEndPos.size())))];
-        auto* drone = new Drone(&worldManager, node->GetId());
+        while (spawnedLocationsUsed.contains(node->GetId()))
+        {
+            node = startEndPos[static_cast<size_t>(EngineDefaults::GetNextInt(static_cast<int>(startEndPos.size())))];
+        }
+        spawnedLocationsUsed.emplace(node->GetId());
+        auto* drone = new Drone(&worldManager, node->GetId(), worldManager.GetNextAvailableDroneId());
         worldManager.AddDrone(drone);
-        drone->SetDestination(startEndPos[static_cast<size_t>(EngineDefaults::GetNextInt(static_cast<int>(startEndPos.size())))]->GetId());
+        uint32_t destNodeId = startEndPos[static_cast<size_t>(EngineDefaults::GetNextInt(static_cast<int>(startEndPos.size())))]->GetId();
+        while (destNodeId == node->GetId())
+        {
+            destNodeId = startEndPos[static_cast<size_t>(EngineDefaults::GetNextInt(static_cast<int>(startEndPos.size())))]->GetId();
+        }
+        drone->SetDestination(destNodeId);
     }
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
+    double timePrev = glfwGetTime();
     while (glfwWindowShouldClose(window) == 0)
     {
         linesTessellationDrones.Reset();

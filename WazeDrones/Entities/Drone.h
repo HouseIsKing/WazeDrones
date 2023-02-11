@@ -21,13 +21,15 @@ class Drone
     std::forward_list<const GraphNode*> Path;
     unique_ptr<GraphNode> Temp;
     vec3 PreviousTarget;
+    uint16_t Id;
+    bool IsRemovingFromWorld = false;
     void GenerateTessellationData();
     void ForceClimbUp();
-    void ForceClimbDown();
+    bool ForceClimbDown();
     AStarNode* NeighborUpdateAStar(std::priority_queue<AStarNode*, std::vector<AStarNode*>, AStarCompare>& cells, std::unordered_map<GraphNode*, unique_ptr<AStarNode>>& cellsSearched, AStarNode* current) const;
 
 public:
-    Drone(WorldManager* worldManager, uint32_t idNodeStart);
+    Drone(WorldManager* worldManager, uint32_t idNodeStart, uint16_t id);
     void Tick(float deltaTime);
     void Draw();
     void SetDestination(uint32_t idNodeEnd);
@@ -37,4 +39,5 @@ public:
     void RemoveDroneCollision(Drone* drone);
     float GetDistanceFromNoY(const vec3& point);
     [[nodiscard]] int GetUpOffset() const;
+    [[nodiscard]] uint16_t GetId() const;
 };

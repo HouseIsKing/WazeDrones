@@ -26,6 +26,12 @@ void CameraManager::Tick()
     {
         CameraInstance.Position += CameraInstance.GetRightVector();
     }
+    state = glfwGetKey(Window, GLFW_KEY_G);
+    if (state == GLFW_PRESS)
+    {
+        CameraInstance.Position = TeleportToCollision;
+        CameraInstance.Position -= CameraInstance.GetFrontVector() * 10.0F;
+    }
     double x;
     double y;
     glfwGetCursorPos(Window, &x, &y);
@@ -46,3 +52,5 @@ void CameraManager::Tick()
     Shader::SetMat4(EngineDefaults::GetShader()->GetUniformInt("view"), CameraInstance.GetViewMatrix());
     Shader::SetMat4(EngineDefaults::GetShader()->GetUniformInt("projection"), CameraInstance.GetProjectionMatrix());
 }
+
+vec3 CameraManager::TeleportToCollision = vec3();

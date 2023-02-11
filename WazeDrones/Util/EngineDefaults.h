@@ -2,6 +2,7 @@
 #include "../Shaders/Shader.h"
 #include "../Textures/Texture.h"
 #include "CustomRandomEngine.h"
+#include "FontManager.h"
 #include <array>
 
 using std::array;
@@ -16,6 +17,7 @@ class EngineDefaults
     static bool HasInit;
     static void Init();
     static CustomRandomEngine Engine;
+    static FontManager MainFont;
 
 public:
     static Shader* GetShader();
