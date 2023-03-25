@@ -171,89 +171,21 @@
     <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="Entities\Drone.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="PerformanceGui.cpp" />
     <ClCompile Include="Shaders\Shader.cpp" />
     <ClCompile Include="Textures\Texture.cpp" />
     <ClCompile Include="Util\AStarNode.cpp" />
     <ClCompile Include="Util\BoundingBox.cpp" />
     <ClCompile Include="Util\CustomRandomEngine.cpp" />
-    <ClCompile Include="Util\EngineDefaults.cpp">
-      <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <Optimization>Disabled</Optimization>
-      <SupportJustMyCode>true</SupportJustMyCode>
-      <AssemblerOutput>NoListing</AssemblerOutput>
-      <AssemblerListingLocation>x64\Debug\</AssemblerListingLocation>
-      <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
-      <BrowseInformation>false</BrowseInformation>
-      <BrowseInformationFile>x64\Debug\</BrowseInformationFile>
-      <CompileAs>Default</CompileAs>
-      <ConformanceMode>true</ConformanceMode>
-      <DiagnosticsFormat>Column</DiagnosticsFormat>
-      <DisableLanguageExtensions>false</DisableLanguageExtensions>
-      <ErrorReporting>Prompt</ErrorReporting>
-      <ExpandAttributedSource>false</ExpandAttributedSource>
-      <ExceptionHandling>Sync</ExceptionHandling>
-      <EnableASAN>false</EnableASAN>
-      <EnableFuzzer>false</EnableFuzzer>
-      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
-      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
-      <FloatingPointModel>Precise</FloatingPointModel>
-      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
-      <GenerateModuleDependencies>false</GenerateModuleDependencies>
-      <GenerateSourceDependencies>false</GenerateSourceDependencies>
-      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <IntrinsicFunctions>false</IntrinsicFunctions>
-      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <MinimalRebuild>false</MinimalRebuild>
-      <ModuleDependenciesFile>x64\Debug\</ModuleDependenciesFile>
-      <ModuleOutputFile>x64\Debug\</ModuleOutputFile>
-      <OmitDefaultLibName>false</OmitDefaultLibName>
-      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
-      <WholeProgramOptimization>false</WholeProgramOptimization>
-      <ObjectFileName>x64\Debug\</ObjectFileName>
-      <CallingConvention>Cdecl</CallingConvention>
-      <ProgramDataBaseFileName>x64\Debug\vc143.pdb</ProgramDataBaseFileName>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>x64\Debug\WazeDrones.pch</PrecompiledHeaderOutputFile>
-      <PreprocessToFile>false</PreprocessToFile>
-      <PreprocessKeepComments>false</PreprocessKeepComments>
-      <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
-      <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
-      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
-      <ShowIncludes>false</ShowIncludes>
-      <SourceDependenciesFile>x64\Debug\</SourceDependenciesFile>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <BufferSecurityCheck>true</BufferSecurityCheck>
-      <SmallerTypeCheck>false</SmallerTypeCheck>
-      <SpectreMitigation>false</SpectreMitigation>
-      <StructMemberAlignment>Default</StructMemberAlignment>
-      <TrackerLogDirectory>x64\Debug\WazeDrones.tlog\</TrackerLogDirectory>
-      <TranslateIncludes>false</TranslateIncludes>
-      <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <UseFullPaths>true</UseFullPaths>
-      <WarningLevel>Level3</WarningLevel>
-      <XMLDocumentationFileName>x64\Debug\</XMLDocumentationFileName>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <IntelJCCErratum>false</IntelJCCErratum>
-      <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
-      <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
-      <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
-      <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_UNICODE;UNICODE;</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
-      <LinkCompiled>true</LinkCompiled>
-    </ClCompile>
+    <ClCompile Include="Util\EngineDefaults.cpp" />
     <ClCompile Include="Util\FontManager.cpp" />
     <ClCompile Include="Util\Graph.cpp" />
     <ClCompile Include="Util\GraphNode.cpp" />
+    <ClCompile Include="Util\GuiTessellation.cpp" />
+    <ClCompile Include="Util\GuiVertex.cpp" />
     <ClCompile Include="Util\OctreeNode.cpp" />
     <ClCompile Include="Util\TessellationHelper.cpp" />
+    <ClCompile Include="Util\TessellationInterface.cpp" />
     <ClCompile Include="Util\Transform.cpp" />
     <ClCompile Include="Util\Vertex.cpp" />
     <ClCompile Include="WazeDrones.cpp" />
@@ -263,6 +195,8 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CameraManager.h" />
     <ClInclude Include="Entities\Drone.h" />
+    <ClInclude Include="Gui.h" />
+    <ClInclude Include="PerformanceGui.h" />
     <ClInclude Include="Shaders\Shader.h" />
     <ClInclude Include="Textures\Texture.h" />
     <ClInclude Include="Util\AStarNode.h" />
@@ -272,8 +206,11 @@
     <ClInclude Include="Util\FontManager.h" />
     <ClInclude Include="Util\Graph.h" />
     <ClInclude Include="Util\GraphNode.h" />
+    <ClInclude Include="Util\GuiTessellation.h" />
+    <ClInclude Include="Util\GuiVertex.h" />
     <ClInclude Include="Util\OctreeNode.h" />
     <ClInclude Include="Util\TessellationHelper.h" />
+    <ClInclude Include="Util\TessellationInterface.h" />
     <ClInclude Include="Util\Transform.h" />
     <ClInclude Include="Util\Vertex.h" />
     <ClInclude Include="WorldManager.h" />
@@ -291,7 +228,12 @@
     <Content Include="Shaders\FragmentShader.glsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Shaders\GUIFragmentShader.glsl" />
+    <Content Include="Shaders\GUIVertexShader.glsl" />
     <Content Include="Shaders\VertexShader.glsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Textures\default.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Textures\road.jpg" />

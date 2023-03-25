@@ -30,6 +30,7 @@ class OctreeNode
 
 public:
     std::vector<OctreeNode*> GetAllLeavesNotColliding();
+    float GetVolume() const;
     explicit OctreeNode(BoundingBox boundary, OctreeNode* parent);
     explicit OctreeNode(OctreeNode* parent);
     OctreeNode(const OctreeNode&) = delete;

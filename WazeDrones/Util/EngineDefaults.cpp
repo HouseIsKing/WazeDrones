@@ -9,9 +9,11 @@
 bool EngineDefaults::HasInit = false;
 bool EngineDefaults::HasBuiltTextureUbo = false;
 unique_ptr<Shader> EngineDefaults::TheShader = {};
+unique_ptr<Shader> EngineDefaults::TheGuiShader = {};
 CustomRandomEngine EngineDefaults::Engine = {};
 std::unordered_map<Texture*, uint16_t> EngineDefaults::TextureList = {};
 GLuint EngineDefaults::UboTextures = 0;
+FontManager EngineDefaults::MainFont{"Textures/default.png"};
 
 Shader* EngineDefaults::GetShader()
 {
@@ -23,10 +25,21 @@ Shader* EngineDefaults::GetShader()
     return TheShader.get();
 }
 
+Shader* EngineDefaults::GetGuiShader()
+{
+    if (!HasInit)
+    {
+        Init();
+        TheGuiShader->Use();
+    }
+    return TheGuiShader.get();
+}
+
 void EngineDefaults::Init()
 {
     HasInit = true;
     TheShader = std::make_unique<Shader>("Shaders/VertexShader.glsl", "Shaders/FragmentShader.glsl");
+    TheGuiShader = std::make_unique<Shader>("Shaders/GuiVertexShader.glsl", "Shaders/GuiFragmentShader.glsl");
     glGenBuffers(1, &UboTextures);
 }
 
@@ -82,4 +95,9 @@ void EngineDefaults::ResetTextures()
     }
     TextureList.clear();
     HasBuiltTextureUbo = false;
+}
+
+const FontManager& EngineDefaults::GetFontManager()
+{
+    return MainFont;
 }

@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "CameraManager.h"
+#include "PerformanceGui.h"
 #include "Entities/Drone.h"
 #include "Util/Graph.h"
 #include "Util/OctreeNode.h"
@@ -292,6 +293,27 @@ std::vector<GraphNode*> BuildOctreeAndWaypointGraph(OctreeNode& root, std::vecto
     return helper;
 }
 
+void CalcDensity(GLFWwindow* window, const std::vector<OctreeNode*>& leaves, PerformanceGui& gui)
+{
+    float safetyVolume = 100.0F * 100.0F * 15.0F;
+    float maxNumDrones = 0;
+    float averageNumDrones = 0.0F;
+    for (const auto* const leaf : leaves)
+    {
+        const float value = static_cast<float>(leaf->GetDronesInsideNode().size()) / (leaf->GetVolume() / safetyVolume);
+        averageNumDrones += value;
+        if (value > maxNumDrones)
+        {
+            maxNumDrones = value;
+        }
+    }
+    averageNumDrones /= static_cast<float>(leaves.size());
+    const std::string textToDraw1 = "Max entropy of drones in a safety leaf: " + std::to_string(maxNumDrones);
+    const std::string textToDraw2 = "Average number of drones in a safety leaf: " + std::to_string(averageNumDrones);
+    gui.DrawStringAt(window, textToDraw1, 5.0F, 5.0F, 0.0F, 0.8F, 0.8F, 0.8F, 1.0F);
+    gui.DrawStringAt(window, textToDraw2, 5.0F, 25.0F, 0.0F, 0.8F, 0.8F, 0.8F, 1.0F);
+}
+
 int main(int /*argc*/, char* /*argv*/[])
 {
     GLFWwindow* window = Init();
@@ -310,9 +332,11 @@ int main(int /*argc*/, char* /*argv*/[])
     TessellationHelper linesTessellationDrones{EngineDefaults::GetShader(), GL_LINES};
     std::vector<BoundingBox> colliders;
     WorldManager worldManager;
+    PerformanceGui gui;
     BuildSimulationGeometry(worldTessellation, linesTessellation, *worldManager.GetRoot(), colliders);
     std::vector<GraphNode*> startEndPos = BuildOctreeAndWaypointGraph(*worldManager.GetRoot(), colliders, *worldManager.GetGraph());
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    std::vector<OctreeNode*> leaves = worldManager.GetRoot()->GetAllLeavesNotColliding();
     std::unordered_set<uint32_t> spawnedLocationsUsed{};
     for (int i = 0; i < 2000; i++)
     {
@@ -340,12 +364,15 @@ int main(int /*argc*/, char* /*argv*/[])
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         if (tickTimer > 1.0 / 20.0)
         {
+            gui.Rebuild();
             worldManager.Tick(tickTimer);
-            tickTimer = 0.0;
+            CalcDensity(window, leaves, gui);
+            tickTimer -= 1.0 / 20.0;
         }
         cameraManager.Tick();
         worldTessellation.Draw();
         worldManager.Draw();
+        gui.Render();
         linesTessellationDrones.Draw();
         glLineWidth(6);
         linesTessellation.Draw();

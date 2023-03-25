@@ -11,6 +11,7 @@ using std::unique_ptr;
 class EngineDefaults
 {
     static unique_ptr<Shader> TheShader;
+    static unique_ptr<Shader> TheGuiShader;
     static std::unordered_map<Texture*, uint16_t> TextureList;
     static GLuint UboTextures;
     static bool HasBuiltTextureUbo;
@@ -21,6 +22,7 @@ class EngineDefaults
 
 public:
     static Shader* GetShader();
+    static Shader* GetGuiShader();
     template <typename T>
     static T GetNext(T maxValue);
     template <typename T>
@@ -31,6 +33,7 @@ public:
     static uint16_t RegisterTexture(Texture* texture);
     static void BuildTextureUbo();
     static void ResetTextures();
+    static const FontManager& GetFontManager();
 };
 
 template <typename T>

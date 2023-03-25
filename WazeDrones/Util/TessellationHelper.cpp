@@ -87,6 +87,7 @@ void TessellationHelper::Draw(const size_t transformId, const size_t startPos, s
 	{
 		return;
 	}
+	TheShader->Use();
 	Shader::SetMat4(PositionUniform, GetTransformationMatrix(transformId));
 	glBindVertexArray(Vao);
 	if (!HasInit)

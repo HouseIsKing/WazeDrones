@@ -333,6 +333,11 @@ std::vector<OctreeNode*> OctreeNode::GetAllLeavesNotColliding()
     return leaves;
 }
 
+float OctreeNode::GetVolume() const
+{
+    return Boundary.GetVolume();
+}
+
 OctreeNode::OctreeNode(const BoundingBox boundary, OctreeNode* parent) : Parent(parent), Boundary(boundary), IsColliding(false)
 {
     Init(Boundary);
