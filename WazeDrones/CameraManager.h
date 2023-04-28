@@ -3,6 +3,8 @@
 #include "Util/EngineDefaults.h"
 #include <GLFW/glfw3.h>
 
+#include "WorldManager.h"
+
 class CameraManager
 {
     Camera CameraInstance;
@@ -14,5 +16,5 @@ class CameraManager
 public:
     static vec3 TeleportToCollision;
     explicit CameraManager(GLFWwindow* window);
-    void Tick();
+    void Tick(WorldManager& world);
 };

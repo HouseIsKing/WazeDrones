@@ -492,6 +492,7 @@ OctreeNode* OctreeNode::GetLeafAt(const vec3& position)
                 return Children.at(static_cast<Position>(p))->GetLeafAt(position);
             }
         }
+        return nullptr;
     }
     return this;
 }

@@ -1,10 +1,12 @@
 ﻿#include "CameraManager.h"
 
+#include "WorldManager.h"
+
 CameraManager::CameraManager(GLFWwindow* window) : CameraInstance(vec3(), 16.0F / 9.0F), Window(window), PrevMouseX(0), PrevMouseY(0)
 {
 }
 
-void CameraManager::Tick()
+void CameraManager::Tick(WorldManager& world)
 {
     int state = glfwGetKey(Window, GLFW_KEY_W);
     if (state == GLFW_PRESS)
@@ -30,6 +32,12 @@ void CameraManager::Tick()
     if (state == GLFW_PRESS)
     {
         CameraInstance.Position = TeleportToCollision;
+        CameraInstance.Position -= CameraInstance.GetFrontVector() * 10.0F;
+    }
+    state = glfwGetKey(Window, GLFW_KEY_H);
+    if (state == GLFW_PRESS)
+    {
+        CameraInstance.Position = world.GetRandomDronePosition();
         CameraInstance.Position -= CameraInstance.GetFrontVector() * 10.0F;
     }
     double x;

@@ -295,23 +295,41 @@ std::vector<GraphNode*> BuildOctreeAndWaypointGraph(OctreeNode& root, std::vecto
 
 void CalcDensity(GLFWwindow* window, const std::vector<OctreeNode*>& leaves, PerformanceGui& gui)
 {
-    float safetyVolume = 100.0F * 100.0F * 15.0F;
+    constexpr float safetyVolume = 60.0F * 60.0F * 15.0F;
     float maxNumDrones = 0;
-    float averageNumDrones = 0.0F;
     for (const auto* const leaf : leaves)
     {
-        const float value = static_cast<float>(leaf->GetDronesInsideNode().size()) / (leaf->GetVolume() / safetyVolume);
-        averageNumDrones += value;
-        if (value > maxNumDrones)
+        float numDrones = 0;
+        for (const Drone* drone : leaf->GetDronesInsideNode())
+        {
+            numDrones += 1.0F / static_cast<float>(drone->GetNumLeavesDroneAt());
+        }
+        if (const float value = numDrones / (leaf->GetVolume() / safetyVolume); value > maxNumDrones)
         {
             maxNumDrones = value;
         }
     }
-    averageNumDrones /= static_cast<float>(leaves.size());
     const std::string textToDraw1 = "Max entropy of drones in a safety leaf: " + std::to_string(maxNumDrones);
-    const std::string textToDraw2 = "Average number of drones in a safety leaf: " + std::to_string(averageNumDrones);
     gui.DrawStringAt(window, textToDraw1, 5.0F, 5.0F, 0.0F, 0.8F, 0.8F, 0.8F, 1.0F);
-    gui.DrawStringAt(window, textToDraw2, 5.0F, 25.0F, 0.0F, 0.8F, 0.8F, 0.8F, 1.0F);
+}
+
+void SpawnDroneThread(const std::vector<GraphNode*>& startEndPos, const bool& spawnDrones, const bool& simulationEnd, WorldManager& worldManager)
+{
+    while (!simulationEnd)
+    {
+        if (spawnDrones)
+        {
+            const GraphNode* start = startEndPos[static_cast<size_t>(EngineDefaults::GetNextInt(static_cast<int>(startEndPos.size())))];
+            auto* drone = new Drone(&worldManager, start->GetId(), worldManager.GetNextAvailableDroneId());
+            uint32_t destNodeId = startEndPos[static_cast<size_t>(EngineDefaults::GetNextInt(static_cast<int>(startEndPos.size())))]->GetId();
+            while (destNodeId == start->GetId())
+            {
+                destNodeId = startEndPos[static_cast<size_t>(EngineDefaults::GetNextInt(static_cast<int>(startEndPos.size())))]->GetId();
+            }
+            drone->SetDestination(destNodeId);
+            worldManager.AddDrone(drone);
+        }
+    }
 }
 
 int main(int /*argc*/, char* /*argv*/[])
@@ -347,14 +365,17 @@ int main(int /*argc*/, char* /*argv*/[])
         }
         spawnedLocationsUsed.emplace(node->GetId());
         auto* drone = new Drone(&worldManager, node->GetId(), worldManager.GetNextAvailableDroneId());
-        worldManager.AddDrone(drone);
         uint32_t destNodeId = startEndPos[static_cast<size_t>(EngineDefaults::GetNextInt(static_cast<int>(startEndPos.size())))]->GetId();
         while (destNodeId == node->GetId())
         {
             destNodeId = startEndPos[static_cast<size_t>(EngineDefaults::GetNextInt(static_cast<int>(startEndPos.size())))]->GetId();
         }
         drone->SetDestination(destNodeId);
+        worldManager.AddDrone(drone);
     }
+    bool spawnDrones = false;
+    bool simulationEnd = false;
+    std::thread droneThread(SpawnDroneThread, std::ref(startEndPos), std::ref(spawnDrones), std::ref(simulationEnd), std::ref(worldManager));
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     double timePrev = glfwGetTime();
@@ -365,11 +386,17 @@ int main(int /*argc*/, char* /*argv*/[])
         if (tickTimer > 1.0 / 20.0)
         {
             gui.Rebuild();
+            if (tickTimer > 2.0 / 20.0)
+            {
+                tickTimer = 1.0 / 20.0;
+            }
             worldManager.Tick(tickTimer);
+            const std::string textToDraw3 = "Amount of drones in the simulation currently: " + std::to_string(worldManager.GetDroneCount());
+            gui.DrawStringAt(window, textToDraw3, 5.0F, 15.0F, 0.0F, 0.8F, 0.8F, 0.8F, 1.0F);
             CalcDensity(window, leaves, gui);
             tickTimer -= 1.0 / 20.0;
         }
-        cameraManager.Tick();
+        cameraManager.Tick(worldManager);
         worldTessellation.Draw();
         worldManager.Draw();
         gui.Render();
@@ -388,8 +415,18 @@ int main(int /*argc*/, char* /*argv*/[])
             std::cout << "FPS: " << counter << std::endl;
             counter = 0;
         }
+        /*if (worldManager.GetDroneCount() < 2000)
+        {
+            spawnDrones = true;
+        }
+        else
+        {
+            spawnDrones = false;
+        }*/
         glfwPollEvents();
     }
+    simulationEnd = true; // NOLINT(clang-analyzer-deadcode.DeadStores)
+    droneThread.join();
     glfwTerminate();
     return 0;
 }

@@ -81,7 +81,8 @@ void Drone::Tick(const float deltaTime)
     {
         return;
     }
-    constexpr float x = 100.0F;
+    TimeTravel += deltaTime / 20.0F;
+    constexpr float x = 60.0F;
     constexpr float y = 15.0F;
     vec3 currentGoal = Path.front()->GetPosition();
     vec3 originalGoal = currentGoal;
@@ -110,6 +111,15 @@ void Drone::Tick(const float deltaTime)
             {
                 World->RemoveDrone(Id);
                 IsRemovingFromWorld = true;
+                float timePercentage = (TimeTravel - ExpectedTimeTravel) / ExpectedTimeTravel * 100.0F;
+                std::cout << "Drone " << Id << " has reached its destination." << std::endl;
+                std::cout << "Drone " << Id << " has traveled " << TimeTravel << " seconds. While expected " << ExpectedTimeTravel << std::endl;
+                std::cout << "Percentage difference: " << timePercentage << "%" << std::endl;
+                World->DroneArrived(timePercentage);
+                for (const auto& node : OctreeList | std::views::keys)
+                {
+                    node->RemoveDrone(this);
+                }
                 return;
             }
         }
@@ -129,9 +139,23 @@ void Drone::Tick(const float deltaTime)
     {
         val = false;
     }
+    vec3 pos = DroneTransform.GetTransform(0).GetPosition();
     for (uint32_t i = 0; i < 8; ++i)
     {
-        if (OctreeNode* node = World->GetRoot()->GetLeafAt(corners[i]); OctreeList.emplace(node, true).second)
+        if (OctreeNode* node = World->GetRoot()->GetLeafAt(corners[i]); node == nullptr)
+        {
+            if (pos.y > y + 2.0F)
+            {
+                for (OctreeNode* n : OctreeList | std::views::keys)
+                {
+                    n->RemoveDrone(this);
+                }
+                OctreeList.clear();
+                DroneList.clear();
+                break;
+            }
+        }
+        else if (OctreeList.emplace(node, true).second)
         {
             node->AddDrone(this);
         }
@@ -163,24 +187,23 @@ void Drone::Tick(const float deltaTime)
             }
         }
     }
-    std::vector<Drone*> temp;
-    for (Drone* drone : DroneList)
+    std::vector<uint16_t> temp;
+    for (Drone* drone : DroneList | std::views::values)
     {
-        if (drone->IsRemovingFromWorld || drone->GetDistanceFromNoY(DroneTransform.GetTransform(0).GetPosition()) > x * x * 2)
+        if (drone->GetDistanceFromNoY(DroneTransform.GetTransform(0).GetPosition()) > x * x * 2)
         {
-            temp.push_back(drone);
+            temp.push_back(drone->GetId());
         }
     }
-    for (Drone* drone : temp)
+    for (uint16_t drone : temp)
     {
         DroneList.erase(drone);
     }
     BoundingBox droneCollider = Collider;
-    vec3 pos = DroneTransform.GetTransform(0).GetPosition();
     droneCollider.Move(pos.x, pos.y, pos.z);
     float closestY = y + 2.0F;
     GoingUp = false;
-    for (Drone* drone : DroneList)
+    for (Drone* drone : DroneList | std::views::values)
     {
         BoundingBox otherCollider = drone->Collider;
         vec3 otherPos = drone->DroneTransform.GetTransform(0).GetPosition();
@@ -193,13 +216,13 @@ void Drone::Tick(const float deltaTime)
         if (otherPos.y <= pos.y && !drone->GoingUp)
         {
             closestY = std::min(closestY, pos.y - otherPos.y);
-            if (closestY < 0.01F)
+            if (closestY < 0.5F)
             {
                 GoingUp = true;
             }
         }
     }
-    YNeeded = originalGoal.y - 0.001F;
+    YNeeded = originalGoal.y - 0.01F;
     if (closestY <= y)
     {
         YNeeded = pos.y - closestY + y;
@@ -211,6 +234,21 @@ uint16_t Drone::GetId() const
     return Id;
 }
 
+vec3 Drone::GetPosition()
+{
+    return DroneTransform.GetTransform(0).GetPosition();
+}
+
+int Drone::GetNumLeavesDroneAt() const
+{
+    return static_cast<int>(OctreeList.size());
+}
+
+void Drone::DroneRemoved(const Drone* drone)
+{
+    DroneList.erase(drone->GetId());
+}
+
 float Drone::GetDistanceFromNoY(const vec3& point)
 {
     const vec3 temp = DroneTransform.GetTransform(0).GetPosition() - point;
@@ -220,12 +258,12 @@ float Drone::GetDistanceFromNoY(const vec3& point)
 
 void Drone::AddDroneCollision(Drone* drone)
 {
-    DroneList.emplace(drone);
+    DroneList.emplace(drone->GetId(), drone);
 }
 
-void Drone::RemoveDroneCollision(Drone* drone)
+void Drone::RemoveDroneCollision(const Drone* drone)
 {
-    DroneList.erase(drone);
+    DroneList.erase(drone->GetId());
 }
 
 void Drone::Draw()
@@ -296,6 +334,15 @@ void Drone::PlanPath()
     {
         Path.emplace_front(pathFound->Node);
         pathFound = pathFound->Parent;
+    }
+    auto temp = Path.cbegin();
+    const GraphNode* previousPoint = Start;
+    while (temp != Path.cend())
+    {
+        const float distance = sqrt(previousPoint->Distance(**temp));
+        ExpectedTimeTravel += distance / 8.33333F;
+        previousPoint = *temp;
+        temp = std::next(temp);
     }
 }
 

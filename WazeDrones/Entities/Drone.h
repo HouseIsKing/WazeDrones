@@ -15,7 +15,7 @@ class Drone
     GraphNode* Start;
     GraphNode* End;
     std::unordered_map<OctreeNode*, bool> OctreeList; //Reperesnts which octree nodes the drone is inside.
-    std::unordered_set<Drone*> DroneList; //Represents which drones the drone might collide with.
+    std::unordered_map<uint16_t, Drone*> DroneList; //Represents which drones the drone might collide with.
     float YNeeded = 0.0F;
     bool GoingUp = false;
     //vec3 Velocity;
@@ -24,6 +24,8 @@ class Drone
     vec3 PreviousTarget;
     uint16_t Id;
     bool IsRemovingFromWorld = false;
+    float ExpectedTimeTravel = 0.0F;
+    float TimeTravel = 0.0F;
     void GenerateTessellationData();
     AStarNode* NeighborUpdateAStar(std::priority_queue<AStarNode*, std::vector<AStarNode*>, AStarCompare>& cells, std::unordered_map<GraphNode*, unique_ptr<AStarNode>>& cellsSearched, AStarNode* current) const;
 
@@ -35,7 +37,10 @@ public:
     void PlanPath();
     void DrawPath(TessellationHelper& lineTessellation);
     void AddDroneCollision(Drone* drone);
-    void RemoveDroneCollision(Drone* drone);
+    void RemoveDroneCollision(const Drone* drone);
     float GetDistanceFromNoY(const vec3& point);
     [[nodiscard]] uint16_t GetId() const;
+    [[nodiscard]] vec3 GetPosition();
+    [[nodiscard]] int GetNumLeavesDroneAt() const;
+    void DroneRemoved(const Drone* drone);
 };
