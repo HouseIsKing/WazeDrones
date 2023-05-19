@@ -101,7 +101,7 @@ void BuildPolygon(std::vector<vec3>& polygon, float height, TessellationHelper& 
     tessellationHelper.AddTriangle(previousIndex);
 }
 
-void BuildPolygons(std::ifstream& file, TessellationHelper& tessellationHelper, const uint16_t texture, bool buildCollider, std::vector<BoundingBox>& colliders)
+void BuildPolygons(std::ifstream& file, TessellationHelper& tessellationHelper, const uint16_t texture, const bool buildCollider, std::vector<BoundingBox>& colliders)
 {
     size_t polygonCount;
     file >> polygonCount;
@@ -228,14 +228,17 @@ void BuildSimulationGeometry(TessellationHelper& tessellationHelperTriangles, Te
 std::vector<GraphNode*> BuildOctreeAndWaypointGraph(OctreeNode& root, std::vector<BoundingBox>& colliders, Graph& graph)
 {
     std::vector<GraphNode*> helper;
+    size_t countCollidersLandAble = 0;
     for (BoundingBox& collider : colliders)
     {
         root.Insert(collider);
         if (collider.GetMaxX() - collider.GetMinX() > 1.0F && collider.GetMaxZ() - collider.GetMinZ() > 1.0F)
         {
+            countCollidersLandAble++;
             helper.push_back(graph.AddNode(vec3((collider.GetMaxX() - collider.GetMinX()) / 2.0F + collider.GetMinX(), collider.GetMaxY() + 0.5F, (collider.GetMaxZ() - collider.GetMinZ()) / 2.0F + collider.GetMinZ())));
         }
     }
+    std::cout << "Colliders land able percent: " << static_cast<float>(countCollidersLandAble) / static_cast<float>(colliders.size()) * 100.0F << "%" << std::endl;
     std::vector<OctreeNode*> rootLeaves = root.GetAllLeavesNotColliding();
     std::ranges::sort(rootLeaves);
     unordered_map<OctreeNode*, GraphNode*> nodeToGraphNode;

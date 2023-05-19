@@ -1,6 +1,7 @@
 #pragma once
 #include <forward_list>
 #include <queue>
+#include <set>
 #include <unordered_set>
 
 #include "../Util/AStarNode.h"
@@ -19,7 +20,7 @@ class Drone
     float YNeeded = 0.0F;
     bool GoingUp = false;
     //vec3 Velocity;
-    std::forward_list<const GraphNode*> Path;
+    std::forward_list<GraphNode*> Path;
     unique_ptr<GraphNode> Temp;
     vec3 PreviousTarget;
     uint16_t Id;
@@ -27,14 +28,15 @@ class Drone
     float ExpectedTimeTravel = 0.0F;
     float TimeTravel = 0.0F;
     void GenerateTessellationData();
-    AStarNode* NeighborUpdateAStar(std::priority_queue<AStarNode*, std::vector<AStarNode*>, AStarCompare>& cells, std::unordered_map<GraphNode*, unique_ptr<AStarNode>>& cellsSearched, AStarNode* current) const;
+    AStarNode* NeighborUpdateAStar(std::set<AStarNode*, AStarCompare>& cells, std::unordered_map<GraphNode*, unique_ptr<AStarNode>>& cellsSearched, AStarNode
+                                   * current, bool useWeights) const;
 
 public:
     Drone(WorldManager* worldManager, uint32_t idNodeStart, uint16_t id);
     void Tick(float deltaTime);
     void Draw();
     void SetDestination(uint32_t idNodeEnd);
-    void PlanPath();
+    void PlanPath(bool expectedTimeCalculation);
     void DrawPath(TessellationHelper& lineTessellation);
     void AddDroneCollision(Drone* drone);
     void RemoveDroneCollision(const Drone* drone);

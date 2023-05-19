@@ -10,6 +10,7 @@ class GraphNode
     std::vector<uint32_t> Connections;
 
 public:
+    int AmountOfDronesPassingThrough;
     GraphNode(uint32_t id, vec3 position);
     GraphNode(const GraphNode& other) = delete;
     GraphNode(GraphNode&& other) = delete;

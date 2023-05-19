@@ -4,6 +4,7 @@
 #include "../WorldManager.h"
 #include <memory>
 #include <ranges>
+#include <set>
 
 #include "../CameraManager.h"
 
@@ -82,7 +83,7 @@ void Drone::Tick(const float deltaTime)
         return;
     }
     TimeTravel += deltaTime / 20.0F;
-    constexpr float x = 60.0F;
+    constexpr float x = 75.0F;
     constexpr float y = 15.0F;
     vec3 currentGoal = Path.front()->GetPosition();
     vec3 originalGoal = currentGoal;
@@ -99,29 +100,21 @@ void Drone::Tick(const float deltaTime)
     {
         DroneTransform.GetTransform(0).SetPosition(currentGoal);
         distanceFactor += temp;
-        const GraphNode* front = Path.front();
         Path.pop_front();
         if (Path.empty())
         {
-            if (YNeeded > originalGoal.y)
+            World->RemoveDrone(Id);
+            IsRemovingFromWorld = true;
+            float timePercentage = (TimeTravel - ExpectedTimeTravel) / ExpectedTimeTravel * 100.0F;
+            std::cout << "Drone " << Id << " has reached its destination." << std::endl;
+            std::cout << "Drone " << Id << " has traveled " << TimeTravel << " seconds. While expected " << ExpectedTimeTravel << std::endl;
+            std::cout << "Percentage difference: " << timePercentage << "%" << std::endl;
+            World->DroneArrived(timePercentage);
+            for (const auto& node : OctreeList | std::views::keys)
             {
-                Path.emplace_front(front);
+                node->RemoveDrone(this);
             }
-            else
-            {
-                World->RemoveDrone(Id);
-                IsRemovingFromWorld = true;
-                float timePercentage = (TimeTravel - ExpectedTimeTravel) / ExpectedTimeTravel * 100.0F;
-                std::cout << "Drone " << Id << " has reached its destination." << std::endl;
-                std::cout << "Drone " << Id << " has traveled " << TimeTravel << " seconds. While expected " << ExpectedTimeTravel << std::endl;
-                std::cout << "Percentage difference: " << timePercentage << "%" << std::endl;
-                World->DroneArrived(timePercentage);
-                for (const auto& node : OctreeList | std::views::keys)
-                {
-                    node->RemoveDrone(this);
-                }
-                return;
-            }
+            return;
         }
         PreviousTarget = currentGoal;
         currentGoal = Path.front()->GetPosition();
@@ -278,7 +271,8 @@ void Drone::Draw()
 void Drone::SetDestination(const uint32_t idNodeEnd)
 {
     End = World->GetGraph()->GetNode(idNodeEnd);
-    PlanPath();
+    PlanPath(true);
+    PlanPath(false);
 }
 
 /**
@@ -288,7 +282,7 @@ void Drone::SetDestination(const uint32_t idNodeEnd)
  * \param current Current cell being searched
  * \return The end A* node if found the goal, nullptr otherwise
  */
-AStarNode* Drone::NeighborUpdateAStar(std::priority_queue<AStarNode*, std::vector<AStarNode*>, AStarCompare>& cells, std::unordered_map<GraphNode*, unique_ptr<AStarNode>>& cellsSearched, AStarNode* current) const
+AStarNode* Drone::NeighborUpdateAStar(std::set<AStarNode*, AStarCompare>& cells, std::unordered_map<GraphNode*, unique_ptr<AStarNode>>& cellsSearched, AStarNode* current, bool useWeights) const
 {
     for (const auto& connection : current->Node->GetConnections())
     {
@@ -299,11 +293,20 @@ AStarNode* Drone::NeighborUpdateAStar(std::priority_queue<AStarNode*, std::vecto
             {
                 cell->G = current->G + neighbor->Distance(*current->Node);
                 cell->Parent = current;
+                if (const auto it = cells.find(cell); it != cells.end() && (*it)->Node == cell->Node)
+                {
+                    cells.erase(cell);
+                    cells.emplace(cell);
+                }
             }
         }
         catch (...)
         {
             cellsSearched.emplace(neighbor, new AStarNode(neighbor, current, current->G + neighbor->Distance(*current->Node), neighbor->Distance(*End)));
+            if (useWeights)
+            {
+                cellsSearched.at(neighbor)->SpecialValue = static_cast<float>(neighbor->AmountOfDronesPassingThrough) * 3.0F;
+            }
             cells.emplace(cellsSearched.at(neighbor).get());
             if (neighbor == End)
             {
@@ -317,30 +320,42 @@ AStarNode* Drone::NeighborUpdateAStar(std::priority_queue<AStarNode*, std::vecto
 /**
  * \brief Plans path using A* algorithm.
  */
-void Drone::PlanPath()
+void Drone::PlanPath(const bool expectedTimeCalculation)
 {
-    std::priority_queue<AStarNode*, std::vector<AStarNode*>, AStarCompare> cellQueue;
+    Path.clear();
+    std::set<AStarNode*, AStarCompare> cellQueue;
     std::unordered_map<GraphNode*, unique_ptr<AStarNode>> cellsSearched;
     cellsSearched.emplace(Start, new AStarNode(Start, nullptr, 0, Start->Distance(*End)));
+    if (!expectedTimeCalculation)
+    {
+        cellsSearched.at(Start)->SpecialValue = static_cast<float>(Start->AmountOfDronesPassingThrough) * 3.0F;
+    }
     cellQueue.emplace(cellsSearched.at(Start).get());
     AStarNode* pathFound = nullptr;
     while (pathFound == nullptr)
     {
-        AStarNode* current = cellQueue.top();
-        cellQueue.pop();
-        pathFound = NeighborUpdateAStar(cellQueue, cellsSearched, current);
+        AStarNode* current = *cellQueue.begin();
+        cellQueue.erase(cellQueue.begin());
+        pathFound = NeighborUpdateAStar(cellQueue, cellsSearched, current, expectedTimeCalculation);
     }
     while (pathFound->Parent != nullptr)
     {
         Path.emplace_front(pathFound->Node);
         pathFound = pathFound->Parent;
     }
-    auto temp = Path.cbegin();
-    const GraphNode* previousPoint = Start;
-    while (temp != Path.cend())
+    auto temp = Path.begin();
+    GraphNode* previousPoint = Start;
+    while (temp != Path.end())
     {
-        const float distance = sqrt(previousPoint->Distance(**temp));
-        ExpectedTimeTravel += distance / 8.33333F;
+        if (expectedTimeCalculation)
+        {
+            const float distance = sqrt(previousPoint->Distance(**temp));
+            ExpectedTimeTravel += distance / 8.33333F;
+        }
+        else
+        {
+            previousPoint->AmountOfDronesPassingThrough++;
+        }
         previousPoint = *temp;
         temp = std::next(temp);
     }
