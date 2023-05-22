@@ -228,8 +228,12 @@
     <Content Include="Shaders\FragmentShader.glsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Shaders\GUIFragmentShader.glsl" />
-    <Content Include="Shaders\GUIVertexShader.glsl" />
+    <Content Include="Shaders\GUIFragmentShader.glsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Shaders\GUIVertexShader.glsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Shaders\VertexShader.glsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

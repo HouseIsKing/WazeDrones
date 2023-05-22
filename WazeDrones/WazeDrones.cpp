@@ -1,3 +1,4 @@
+// ReSharper disable CppClangTidyClangAnalyzerDeadcodeDeadStores
 #include <fstream>
 
 #include "Util/EngineDefaults.h"
@@ -298,7 +299,7 @@ std::vector<GraphNode*> BuildOctreeAndWaypointGraph(OctreeNode& root, std::vecto
 
 void CalcDensity(GLFWwindow* window, const std::vector<OctreeNode*>& leaves, PerformanceGui& gui)
 {
-    constexpr float safetyVolume = 60.0F * 60.0F * 15.0F;
+    constexpr float safetyVolume = 105.0F * 105.0F * 15.0F;
     float maxNumDrones = 0;
     for (const auto* const leaf : leaves)
     {
@@ -312,11 +313,11 @@ void CalcDensity(GLFWwindow* window, const std::vector<OctreeNode*>& leaves, Per
             maxNumDrones = value;
         }
     }
-    const std::string textToDraw1 = "Max entropy of drones in a safety leaf: " + std::to_string(maxNumDrones);
+    const std::string textToDraw1 = "Max density of drones in a safety leaf: " + std::to_string(maxNumDrones);
     gui.DrawStringAt(window, textToDraw1, 5.0F, 5.0F, 0.0F, 0.8F, 0.8F, 0.8F, 1.0F);
 }
 
-void SpawnDroneThread(const std::vector<GraphNode*>& startEndPos, const bool& spawnDrones, const bool& simulationEnd, WorldManager& worldManager)
+void SpawnDroneThread(const std::vector<GraphNode*>& startEndPos, bool& spawnDrones, const bool& simulationEnd, WorldManager& worldManager)
 {
     while (!simulationEnd)
     {
@@ -331,6 +332,7 @@ void SpawnDroneThread(const std::vector<GraphNode*>& startEndPos, const bool& sp
             }
             drone->SetDestination(destNodeId);
             worldManager.AddDrone(drone);
+            spawnDrones = worldManager.GetDroneCount() < 2000;
         }
     }
 }
@@ -358,24 +360,6 @@ int main(int /*argc*/, char* /*argv*/[])
     std::vector<GraphNode*> startEndPos = BuildOctreeAndWaypointGraph(*worldManager.GetRoot(), colliders, *worldManager.GetGraph());
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     std::vector<OctreeNode*> leaves = worldManager.GetRoot()->GetAllLeavesNotColliding();
-    std::unordered_set<uint32_t> spawnedLocationsUsed{};
-    for (int i = 0; i < 2000; i++)
-    {
-        GraphNode* node = startEndPos[static_cast<size_t>(EngineDefaults::GetNextInt(static_cast<int>(startEndPos.size())))];
-        while (spawnedLocationsUsed.contains(node->GetId()))
-        {
-            node = startEndPos[static_cast<size_t>(EngineDefaults::GetNextInt(static_cast<int>(startEndPos.size())))];
-        }
-        spawnedLocationsUsed.emplace(node->GetId());
-        auto* drone = new Drone(&worldManager, node->GetId(), worldManager.GetNextAvailableDroneId());
-        uint32_t destNodeId = startEndPos[static_cast<size_t>(EngineDefaults::GetNextInt(static_cast<int>(startEndPos.size())))]->GetId();
-        while (destNodeId == node->GetId())
-        {
-            destNodeId = startEndPos[static_cast<size_t>(EngineDefaults::GetNextInt(static_cast<int>(startEndPos.size())))]->GetId();
-        }
-        drone->SetDestination(destNodeId);
-        worldManager.AddDrone(drone);
-    }
     bool spawnDrones = false;
     bool simulationEnd = false;
     std::thread droneThread(SpawnDroneThread, std::ref(startEndPos), std::ref(spawnDrones), std::ref(simulationEnd), std::ref(worldManager));
@@ -418,17 +402,10 @@ int main(int /*argc*/, char* /*argv*/[])
             std::cout << "FPS: " << counter << std::endl;
             counter = 0;
         }
-        /*if (worldManager.GetDroneCount() < 2000)
-        {
-            spawnDrones = true;
-        }
-        else
-        {
-            spawnDrones = false;
-        }*/
+        spawnDrones = worldManager.GetDroneCount() < 2000;
         glfwPollEvents();
     }
-    simulationEnd = true; // NOLINT(clang-analyzer-deadcode.DeadStores)
+    simulationEnd = true;
     droneThread.join();
     glfwTerminate();
     return 0;

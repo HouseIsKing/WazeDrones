@@ -11,7 +11,7 @@ struct AStarNode;
 class Drone
 {
     BoundingBox Collider;
-    TessellationHelper DroneTransform;
+    unique_ptr<TessellationHelper> DroneTransform;
     WorldManager* World;
     GraphNode* Start;
     GraphNode* End;
@@ -27,7 +27,7 @@ class Drone
     bool IsRemovingFromWorld = false;
     float ExpectedTimeTravel = 0.0F;
     float TimeTravel = 0.0F;
-    void GenerateTessellationData();
+    void GenerateTessellationData() const;
     AStarNode* NeighborUpdateAStar(std::set<AStarNode*, AStarCompare>& cells, std::unordered_map<GraphNode*, unique_ptr<AStarNode>>& cellsSearched, AStarNode
                                    * current, bool useWeights) const;
 
@@ -37,12 +37,12 @@ public:
     void Draw();
     void SetDestination(uint32_t idNodeEnd);
     void PlanPath(bool expectedTimeCalculation);
-    void DrawPath(TessellationHelper& lineTessellation);
+    void DrawPath(TessellationHelper& lineTessellation) const;
     void AddDroneCollision(Drone* drone);
     void RemoveDroneCollision(const Drone* drone);
-    float GetDistanceFromNoY(const vec3& point);
+    float GetDistanceFromNoY(const vec3& point) const;
     [[nodiscard]] uint16_t GetId() const;
-    [[nodiscard]] vec3 GetPosition();
+    [[nodiscard]] vec3 GetPosition() const;
     [[nodiscard]] int GetNumLeavesDroneAt() const;
     void DroneRemoved(const Drone* drone);
 };

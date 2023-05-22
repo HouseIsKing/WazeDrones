@@ -62,11 +62,6 @@ void WorldManager::DroneArrived(const float timePercentage)
 {
     AverageTimePercentage += timePercentage;
     DroneArrivedCount++;
-    if (DroneArrivedCount == 2000)
-    {
-        AverageTimePercentage /= static_cast<float>(DroneArrivedCount);
-        std::cout << "Average time percentage: " << AverageTimePercentage << std::endl;
-    }
 }
 
 void WorldManager::Draw() const
@@ -75,6 +70,12 @@ void WorldManager::Draw() const
     {
         i->Draw();
     }
+}
+
+void WorldManager::DrawStats() const
+{
+    const auto stat = AverageTimePercentage / static_cast<float>(DroneArrivedCount);
+    std::cout << "Average time percentage: " << stat << "%" << std::endl;
 }
 
 size_t WorldManager::GetDroneCount()

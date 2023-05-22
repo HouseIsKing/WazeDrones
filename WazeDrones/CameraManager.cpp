@@ -40,6 +40,11 @@ void CameraManager::Tick(WorldManager& world)
         CameraInstance.Position = world.GetRandomDronePosition();
         CameraInstance.Position -= CameraInstance.GetFrontVector() * 10.0F;
     }
+    state = glfwGetKey(Window, GLFW_KEY_SPACE);
+    if (state == GLFW_PRESS)
+    {
+        world.DrawStats();
+    }
     double x;
     double y;
     glfwGetCursorPos(Window, &x, &y);

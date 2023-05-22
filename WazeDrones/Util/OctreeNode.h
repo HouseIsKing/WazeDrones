@@ -18,7 +18,7 @@ class OctreeNode
     bool IsColliding;
     std::unordered_map<Position, std::unique_ptr<OctreeNode>> Children;
     std::vector<Drone*> DronesInsideNode;
-    inline static float MinSize = 75.0F;
+    inline static float MinSize = 105.0F;
     static BoundingBox GetChildrenBound(const BoundingBox& boundary, int boundingBoxIndex);
     [[nodiscard]] Position GetPosition() const;
     [[nodiscard]] OctreeNode* GetNeighborGreaterOrEqualLeft() const;

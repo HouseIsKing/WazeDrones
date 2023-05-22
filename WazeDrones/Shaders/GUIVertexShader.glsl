@@ -6,6 +6,7 @@ layout (location = 3) in int aIndex;
 layout (location = 4) in uint SpecialEffects;
 
 uniform uint worldTime;
+uniform mat4 transformationMatrix;
 
 out vec2 outTexture;
 out vec4 color;

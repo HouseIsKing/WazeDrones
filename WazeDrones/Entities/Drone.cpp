@@ -14,63 +14,60 @@
  * \param idNodeStart Start node
  * \param id Drone id
  */
-Drone::Drone(WorldManager* worldManager, const uint32_t idNodeStart, const uint16_t id) : Collider(-0.5F, -0.5F, -0.5F, 0.5F, 0.5F, 0.5F),
-    DroneTransform(EngineDefaults::GetShader()), World(worldManager),
+Drone::Drone(WorldManager* worldManager, const uint32_t idNodeStart, const uint16_t id) : Collider(-0.5F, -0.5F, -0.5F, 0.5F, 0.5F, 0.5F), World(worldManager),
     Start(World->GetGraph()->GetNode(idNodeStart)), End(nullptr), PreviousTarget(), Id(id)
 {
-    DroneTransform.GetTransform(0).SetPosition(Start->GetPosition());
-    GenerateTessellationData();
 }
 
 /**
  * \brief Drone body tessellation data
  */
-void Drone::GenerateTessellationData()
+void Drone::GenerateTessellationData() const
 {
-    const uint32_t index1 = DroneTransform.AddVertex(Vertex(Collider.GetMinX(), Collider.GetMinY(), Collider.GetMinZ(), 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1));
-    const uint32_t index2 = DroneTransform.AddVertex(Vertex(Collider.GetMaxX(), Collider.GetMinY(), Collider.GetMinZ(), 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1));
-    const uint32_t index3 = DroneTransform.AddVertex(Vertex(Collider.GetMaxX(), Collider.GetMaxY(), Collider.GetMinZ(), 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1));
-    const uint32_t index4 = DroneTransform.AddVertex(Vertex(Collider.GetMinX(), Collider.GetMaxY(), Collider.GetMinZ(), 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1));
-    const uint32_t index5 = DroneTransform.AddVertex(Vertex(Collider.GetMinX(), Collider.GetMinY(), Collider.GetMaxZ(), 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1));
-    const uint32_t index6 = DroneTransform.AddVertex(Vertex(Collider.GetMaxX(), Collider.GetMinY(), Collider.GetMaxZ(), 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1));
-    const uint32_t index7 = DroneTransform.AddVertex(Vertex(Collider.GetMaxX(), Collider.GetMaxY(), Collider.GetMaxZ(), 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1));
-    const uint32_t index8 = DroneTransform.AddVertex(Vertex(Collider.GetMinX(), Collider.GetMaxY(), Collider.GetMaxZ(), 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1));
-    DroneTransform.AddTriangle(index1);
-    DroneTransform.AddTriangle(index3);
-    DroneTransform.AddTriangle(index2);
-    DroneTransform.AddTriangle(index1);
-    DroneTransform.AddTriangle(index4);
-    DroneTransform.AddTriangle(index3);
-    DroneTransform.AddTriangle(index5);
-    DroneTransform.AddTriangle(index6);
-    DroneTransform.AddTriangle(index7);
-    DroneTransform.AddTriangle(index5);
-    DroneTransform.AddTriangle(index7);
-    DroneTransform.AddTriangle(index8);
-    DroneTransform.AddTriangle(index1);
-    DroneTransform.AddTriangle(index2);
-    DroneTransform.AddTriangle(index6);
-    DroneTransform.AddTriangle(index1);
-    DroneTransform.AddTriangle(index6);
-    DroneTransform.AddTriangle(index5);
-    DroneTransform.AddTriangle(index3);
-    DroneTransform.AddTriangle(index4);
-    DroneTransform.AddTriangle(index8);
-    DroneTransform.AddTriangle(index3);
-    DroneTransform.AddTriangle(index8);
-    DroneTransform.AddTriangle(index7);
-    DroneTransform.AddTriangle(index2);
-    DroneTransform.AddTriangle(index3);
-    DroneTransform.AddTriangle(index7);
-    DroneTransform.AddTriangle(index2);
-    DroneTransform.AddTriangle(index7);
-    DroneTransform.AddTriangle(index6);
-    DroneTransform.AddTriangle(index4);
-    DroneTransform.AddTriangle(index1);
-    DroneTransform.AddTriangle(index5);
-    DroneTransform.AddTriangle(index4);
-    DroneTransform.AddTriangle(index5);
-    DroneTransform.AddTriangle(index8);
+    const uint32_t index1 = DroneTransform->AddVertex(Vertex(Collider.GetMinX(), Collider.GetMinY(), Collider.GetMinZ(), 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1));
+    const uint32_t index2 = DroneTransform->AddVertex(Vertex(Collider.GetMaxX(), Collider.GetMinY(), Collider.GetMinZ(), 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1));
+    const uint32_t index3 = DroneTransform->AddVertex(Vertex(Collider.GetMaxX(), Collider.GetMaxY(), Collider.GetMinZ(), 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1));
+    const uint32_t index4 = DroneTransform->AddVertex(Vertex(Collider.GetMinX(), Collider.GetMaxY(), Collider.GetMinZ(), 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1));
+    const uint32_t index5 = DroneTransform->AddVertex(Vertex(Collider.GetMinX(), Collider.GetMinY(), Collider.GetMaxZ(), 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1));
+    const uint32_t index6 = DroneTransform->AddVertex(Vertex(Collider.GetMaxX(), Collider.GetMinY(), Collider.GetMaxZ(), 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1));
+    const uint32_t index7 = DroneTransform->AddVertex(Vertex(Collider.GetMaxX(), Collider.GetMaxY(), Collider.GetMaxZ(), 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1));
+    const uint32_t index8 = DroneTransform->AddVertex(Vertex(Collider.GetMinX(), Collider.GetMaxY(), Collider.GetMaxZ(), 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1));
+    DroneTransform->AddTriangle(index1);
+    DroneTransform->AddTriangle(index3);
+    DroneTransform->AddTriangle(index2);
+    DroneTransform->AddTriangle(index1);
+    DroneTransform->AddTriangle(index4);
+    DroneTransform->AddTriangle(index3);
+    DroneTransform->AddTriangle(index5);
+    DroneTransform->AddTriangle(index6);
+    DroneTransform->AddTriangle(index7);
+    DroneTransform->AddTriangle(index5);
+    DroneTransform->AddTriangle(index7);
+    DroneTransform->AddTriangle(index8);
+    DroneTransform->AddTriangle(index1);
+    DroneTransform->AddTriangle(index2);
+    DroneTransform->AddTriangle(index6);
+    DroneTransform->AddTriangle(index1);
+    DroneTransform->AddTriangle(index6);
+    DroneTransform->AddTriangle(index5);
+    DroneTransform->AddTriangle(index3);
+    DroneTransform->AddTriangle(index4);
+    DroneTransform->AddTriangle(index8);
+    DroneTransform->AddTriangle(index3);
+    DroneTransform->AddTriangle(index8);
+    DroneTransform->AddTriangle(index7);
+    DroneTransform->AddTriangle(index2);
+    DroneTransform->AddTriangle(index3);
+    DroneTransform->AddTriangle(index7);
+    DroneTransform->AddTriangle(index2);
+    DroneTransform->AddTriangle(index7);
+    DroneTransform->AddTriangle(index6);
+    DroneTransform->AddTriangle(index4);
+    DroneTransform->AddTriangle(index1);
+    DroneTransform->AddTriangle(index5);
+    DroneTransform->AddTriangle(index4);
+    DroneTransform->AddTriangle(index5);
+    DroneTransform->AddTriangle(index8);
 }
 
 /**
@@ -78,12 +75,12 @@ void Drone::GenerateTessellationData()
  */
 void Drone::Tick(const float deltaTime)
 {
-    if (Path.empty())
+    if (Path.empty() || DroneTransform == nullptr)
     {
         return;
     }
     TimeTravel += deltaTime / 20.0F;
-    constexpr float x = 75.0F;
+    constexpr float x = 105.0F;
     constexpr float y = 15.0F;
     vec3 currentGoal = Path.front()->GetPosition();
     vec3 originalGoal = currentGoal;
@@ -91,14 +88,14 @@ void Drone::Tick(const float deltaTime)
     {
         currentGoal.y = YNeeded;
     }
-    vec3 currentPos = DroneTransform.GetTransform(0).GetPosition();
+    vec3 currentPos = DroneTransform->GetTransform(0).GetPosition();
     float distanceFactor = 0.0F;
     distanceFactor = std::min(deltaTime * 0.41665F, std::abs(currentPos.y - currentGoal.y));
-    DroneTransform.GetTransform(0).SetPosition(currentPos.x, currentPos.y > currentGoal.y ? currentPos.y - distanceFactor : currentPos.y + distanceFactor, currentPos.z);
-    currentPos = DroneTransform.GetTransform(0).GetPosition();
+    DroneTransform->GetTransform(0).SetPosition(currentPos.x, currentPos.y > currentGoal.y ? currentPos.y - distanceFactor : currentPos.y + distanceFactor, currentPos.z);
+    currentPos = DroneTransform->GetTransform(0).GetPosition();
     if (const float temp = distance(currentPos, currentGoal); temp < deltaTime * 0.41665F - distanceFactor)
     {
-        DroneTransform.GetTransform(0).SetPosition(currentGoal);
+        DroneTransform->GetTransform(0).SetPosition(currentGoal);
         distanceFactor += temp;
         Path.pop_front();
         if (Path.empty())
@@ -118,10 +115,10 @@ void Drone::Tick(const float deltaTime)
         }
         PreviousTarget = currentGoal;
         currentGoal = Path.front()->GetPosition();
-        currentPos = DroneTransform.GetTransform(0).GetPosition();
+        currentPos = DroneTransform->GetTransform(0).GetPosition();
     }
-    DroneTransform.GetTransform(0).SetPosition(currentPos + normalize(currentGoal - currentPos) * (deltaTime * 0.41665F - distanceFactor));
-    const vec3 center = DroneTransform.GetTransform(0).GetPosition();
+    DroneTransform->GetTransform(0).SetPosition(currentPos + normalize(currentGoal - currentPos) * (deltaTime * 0.41665F - distanceFactor));
+    const vec3 center = DroneTransform->GetTransform(0).GetPosition();
     const std::array corners = {
         vec3(center.x - x, center.y - y - 2.0F, center.z - x), vec3(center.x + x, center.y - y - 2.0F, center.z - x),
         vec3(center.x + x, center.y + y + 2.0F, center.z - x), vec3(center.x - x, center.y + y + 2.0F, center.z - x),
@@ -132,7 +129,7 @@ void Drone::Tick(const float deltaTime)
     {
         val = false;
     }
-    vec3 pos = DroneTransform.GetTransform(0).GetPosition();
+    vec3 pos = DroneTransform->GetTransform(0).GetPosition();
     for (uint32_t i = 0; i < 8; ++i)
     {
         if (OctreeNode* node = World->GetRoot()->GetLeafAt(corners[i]); node == nullptr)
@@ -183,7 +180,7 @@ void Drone::Tick(const float deltaTime)
     std::vector<uint16_t> temp;
     for (Drone* drone : DroneList | std::views::values)
     {
-        if (drone->GetDistanceFromNoY(DroneTransform.GetTransform(0).GetPosition()) > x * x * 2)
+        if (drone->GetDistanceFromNoY(DroneTransform->GetTransform(0).GetPosition()) > x * x * 2)
         {
             temp.push_back(drone->GetId());
         }
@@ -199,7 +196,7 @@ void Drone::Tick(const float deltaTime)
     for (Drone* drone : DroneList | std::views::values)
     {
         BoundingBox otherCollider = drone->Collider;
-        vec3 otherPos = drone->DroneTransform.GetTransform(0).GetPosition();
+        vec3 otherPos = drone->DroneTransform->GetTransform(0).GetPosition();
         otherCollider.Move(otherPos.x, otherPos.y, otherPos.z);
         if (otherCollider.IsIntersecting(droneCollider))
         {
@@ -227,9 +224,9 @@ uint16_t Drone::GetId() const
     return Id;
 }
 
-vec3 Drone::GetPosition()
+vec3 Drone::GetPosition() const
 {
-    return DroneTransform.GetTransform(0).GetPosition();
+    return DroneTransform->GetTransform(0).GetPosition();
 }
 
 int Drone::GetNumLeavesDroneAt() const
@@ -242,9 +239,9 @@ void Drone::DroneRemoved(const Drone* drone)
     DroneList.erase(drone->GetId());
 }
 
-float Drone::GetDistanceFromNoY(const vec3& point)
+float Drone::GetDistanceFromNoY(const vec3& point) const
 {
-    const vec3 temp = DroneTransform.GetTransform(0).GetPosition() - point;
+    const vec3 temp = DroneTransform->GetTransform(0).GetPosition() - point;
     const auto temp2 = vec2(temp.x, temp.z);
     return dot(temp2, temp2);
 }
@@ -261,7 +258,13 @@ void Drone::RemoveDroneCollision(const Drone* drone)
 
 void Drone::Draw()
 {
-    DroneTransform.Draw();
+    if (DroneTransform == nullptr)
+    {
+        DroneTransform = std::make_unique<TessellationHelper>(EngineDefaults::GetShader());
+        DroneTransform->GetTransform(0).SetPosition(Start->GetPosition());
+        GenerateTessellationData();
+    }
+    DroneTransform->Draw();
 }
 
 /**
@@ -280,9 +283,10 @@ void Drone::SetDestination(const uint32_t idNodeEnd)
  * \param cells Current cells queue(used for picking next cell to search)
  * \param cellsSearched All the cells that have been searched
  * \param current Current cell being searched
+ * \param useWeights Whether to use weights or not
  * \return The end A* node if found the goal, nullptr otherwise
  */
-AStarNode* Drone::NeighborUpdateAStar(std::set<AStarNode*, AStarCompare>& cells, std::unordered_map<GraphNode*, unique_ptr<AStarNode>>& cellsSearched, AStarNode* current, bool useWeights) const
+AStarNode* Drone::NeighborUpdateAStar(std::set<AStarNode*, AStarCompare>& cells, std::unordered_map<GraphNode*, unique_ptr<AStarNode>>& cellsSearched, AStarNode* current, const bool useWeights) const
 {
     for (const auto& connection : current->Node->GetConnections())
     {
@@ -365,13 +369,13 @@ void Drone::PlanPath(const bool expectedTimeCalculation)
  * \brief Draws the current path of the drone.
  * \param lineTessellation Drawing tool
  */
-void Drone::DrawPath(TessellationHelper& lineTessellation)
+void Drone::DrawPath(TessellationHelper& lineTessellation) const
 {
     if (Path.empty())
     {
         return;
     }
-    uint32_t prevIndex = lineTessellation.AddVertex(Vertex(DroneTransform.GetTransform(0).GetPosition(), 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 1.0F, 1));
+    uint32_t prevIndex = lineTessellation.AddVertex(Vertex(DroneTransform->GetTransform(0).GetPosition(), 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 1.0F, 1));
     for (const auto& node : Path)
     {
         const uint32_t currentIndex = lineTessellation.AddVertex(Vertex(node->GetPosition(), 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 1.0F, 1));

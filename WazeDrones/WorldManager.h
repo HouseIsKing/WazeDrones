@@ -27,6 +27,7 @@ public:
     void RemoveDrone(uint16_t id);
     void DroneArrived(float timePercentage);
     void Draw() const;
+    void DrawStats() const;
     [[nodiscard]] size_t GetDroneCount();
     [[nodiscard]] vec3 GetRandomDronePosition();
 };
